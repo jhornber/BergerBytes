@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BergerBytes.App/BergerBytes.App.csproj" Id="691d4580-808f-4faa-878c-02419266531d">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="BergerBytes.Shared/BergerBytes.Shared.csproj" Id="e6fe3092-7fa7-4013-8cd6-a52123989bf8" />
+</Solution>
