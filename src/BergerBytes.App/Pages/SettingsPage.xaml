@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BergerBytes.App.Pages.SettingsPage"
+             Title="Settings">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,32"
+            Spacing="20">
+
+            <Label
+                Text="⚙️ Settings"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource BrandPrimary}"
+                HorizontalOptions="Start" />
+
+            <Label
+                Text="App preferences and account options."
+                FontSize="16"
+                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+            <Border
+                Stroke="{StaticResource BrandPrimaryBrush}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 12"
+                Padding="16">
+                <VerticalStackLayout Spacing="16">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="Daily Calorie Goal" FontSize="16" VerticalOptions="Center"
+                               HorizontalOptions="Fill" WidthRequest="200" />
+                        <Label Text="2000 kcal" FontSize="16" FontAttributes="Bold"
+                               TextColor="{StaticResource BrandSecondary}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="Dark Mode" FontSize="16" VerticalOptions="Center"
+                               HorizontalOptions="Fill" WidthRequest="200" />
+                        <Switch OnColor="{StaticResource BrandPrimary}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <Button
+                Text="Sign In with Google"
+                BackgroundColor="{StaticResource BrandPrimary}"
+                TextColor="{StaticResource White}"
+                CornerRadius="12"
+                HeightRequest="52"
+                FontAttributes="Bold"
+                FontSize="16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

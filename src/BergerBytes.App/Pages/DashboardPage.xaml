@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BergerBytes.App.Pages.DashboardPage"
+             Title="Dashboard">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,32"
+            Spacing="20">
+
+            <Label
+                Text="📊 Dashboard"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource BrandPrimary}"
+                HorizontalOptions="Start" />
+
+            <Label
+                Text="Your daily nutrition overview."
+                FontSize="16"
+                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+            <Border
+                Stroke="{StaticResource BrandSecondaryBrush}"
+                StrokeThickness="2"
+                StrokeShape="RoundRectangle 12"
+                Padding="20">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Calories Today" FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                    <Label Text="0 / 2000 kcal" FontSize="24" FontAttributes="Bold"
+                           TextColor="{StaticResource BrandSecondary}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Border Grid.Column="0"
+                        Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Protein" FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                               HorizontalOptions="Center" />
+                        <Label Text="0g" FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource BrandPrimary}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1"
+                        Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Carbs" FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                               HorizontalOptions="Center" />
+                        <Label Text="0g" FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource BrandPrimary}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="2"
+                        Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Fat" FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                               HorizontalOptions="Center" />
+                        <Label Text="0g" FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource BrandPrimary}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

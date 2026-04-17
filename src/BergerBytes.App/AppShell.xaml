@@ -3,12 +3,35 @@
     x:Class="BergerBytes.App.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:BergerBytes.App"
-    Title="BergerBytes.App">
+    xmlns:pages="clr-namespace:BergerBytes.App.Pages"
+    Title="BergerBytes"
+    Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource BrandSurface}}"
+    Shell.TabBarForegroundColor="{StaticResource BrandPrimary}"
+    Shell.TabBarTitleColor="{StaticResource BrandPrimary}"
+    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+    Shell.NavBarHasShadow="False"
+    Shell.BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource BrandSurface}}"
+    Shell.ForegroundColor="{StaticResource BrandPrimary}"
+    Shell.TitleColor="{AppThemeBinding Light={StaticResource BrandPrimary}, Dark={StaticResource White}}">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <Tab Title="Log" Route="Log">
+            <ShellContent
+                ContentTemplate="{DataTemplate pages:LogPage}"
+                Route="LogPage" />
+        </Tab>
+
+        <Tab Title="Dashboard" Route="Dashboard">
+            <ShellContent
+                ContentTemplate="{DataTemplate pages:DashboardPage}"
+                Route="DashboardPage" />
+        </Tab>
+
+        <Tab Title="Settings" Route="Settings">
+            <ShellContent
+                ContentTemplate="{DataTemplate pages:SettingsPage}"
+                Route="SettingsPage" />
+        </Tab>
+    </TabBar>
 
 </Shell>

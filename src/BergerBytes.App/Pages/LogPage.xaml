@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BergerBytes.App.Pages.LogPage"
+             Title="Log">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,32"
+            Spacing="20">
+
+            <Label
+                Text="🍔 Meal Log"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource BrandPrimary}"
+                HorizontalOptions="Start" />
+
+            <Label
+                Text="Track your calories and macros here."
+                FontSize="16"
+                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+            <Button
+                Text="+ Add Meal"
+                BackgroundColor="{StaticResource BrandPrimary}"
+                TextColor="{StaticResource White}"
+                CornerRadius="12"
+                HeightRequest="52"
+                FontAttributes="Bold"
+                FontSize="16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
