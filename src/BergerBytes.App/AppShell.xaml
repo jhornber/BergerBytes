@@ -5,29 +5,30 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:BergerBytes.App.Pages"
     Title="BergerBytes"
-    Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource BrandSurface}}"
-    Shell.TabBarForegroundColor="{StaticResource BrandPrimary}"
-    Shell.TabBarTitleColor="{StaticResource BrandPrimary}"
-    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-    Shell.NavBarHasShadow="False"
+    Shell.TabBarBackgroundColor="{StaticResource BrandPrimary}"
+    Shell.TabBarForegroundColor="{StaticResource BrandSecondary}"
+    Shell.TabBarTitleColor="{StaticResource BrandSecondary}"
+    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray400}}"
+    Shell.NavBarHasShadow="True"
     Shell.BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource BrandSurface}}"
     Shell.ForegroundColor="{StaticResource BrandPrimary}"
     Shell.TitleColor="{AppThemeBinding Light={StaticResource BrandPrimary}, Dark={StaticResource White}}">
 
+
     <TabBar>
-        <Tab Title="Log" Route="Log">
+        <Tab Title="📝 Log">
             <ShellContent
                 ContentTemplate="{DataTemplate pages:LogPage}"
                 Route="LogPage" />
         </Tab>
 
-        <Tab Title="Dashboard" Route="Dashboard">
+        <Tab Title="📊 Dashboard">
             <ShellContent
                 ContentTemplate="{DataTemplate pages:DashboardPage}"
                 Route="DashboardPage" />
         </Tab>
 
-        <Tab Title="Settings" Route="Settings">
+        <Tab Title="⚙️ Settings">
             <ShellContent
                 ContentTemplate="{DataTemplate pages:SettingsPage}"
                 Route="SettingsPage" />

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI"
+             x:Class="BergerBytes.App.Pages.BarcodeScannerPage"
+             Title="Scan Barcode"
+             BackgroundColor="Black">
+
+    <Grid>
+        <!-- Camera View -->
+        <zxing:CameraBarcodeReaderView 
+            x:Name="CameraView"
+            IsDetecting="True"
+            BarcodesDetected="OnBarcodesDetected">
+            <zxing:CameraBarcodeReaderView.BarcodesOptions>
+                <zxing:BarcodeReaderOptions 
+                    Formats="UpcA,Ean13"
+                    AutoRotate="True"
+                    TryHarder="True"
+                    TryInverted="True"
+                    Multiple="False" />
+            </zxing:CameraBarcodeReaderView.BarcodesOptions>
+        </zxing:CameraBarcodeReaderView>
+
+        <!-- Overlay with instructions and cancel button -->
+        <VerticalStackLayout 
+            VerticalOptions="Fill"
+            HorizontalOptions="Fill">
+
+            <!-- Top Instructions -->
+            <Grid 
+                Padding="20"
+                BackgroundColor="#CC000000"
+                VerticalOptions="Start">
+                <VerticalStackLayout Spacing="8">
+                    <Label 
+                        Text="📷 Scan Barcode" 
+                        TextColor="White" 
+                        FontSize="28" 
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center" />
+                    <Label 
+                        Text="Position the barcode within the frame" 
+                        TextColor="White" 
+                        FontSize="16" 
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Scanning Frame/Viewfinder -->
+            <Border
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                StrokeThickness="3"
+                Stroke="White"
+                StrokeShape="RoundRectangle 12"
+                WidthRequest="280"
+                HeightRequest="140"
+                BackgroundColor="Transparent"
+                Opacity="0.8">
+                <Label 
+                    Text="🔍" 
+                    FontSize="48" 
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center"
+                    TextColor="White"
+                    Opacity="0.6" />
+            </Border>
+
+            <!-- Bottom Cancel Button -->
+            <Grid 
+                Padding="20"
+                BackgroundColor="#CC000000"
+                VerticalOptions="End">
+                <Button 
+                    Text="✕ Cancel"
+                    Clicked="OnCancelClicked"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    FontSize="18"
+                    CornerRadius="12"
+                    HeightRequest="50"
+                    HorizontalOptions="Fill" />
+            </Grid>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

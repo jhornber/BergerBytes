@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using BergerBytes.App.Services;
+using BergerBytes.App.Pages;
+using BergerBytes.App.ViewModels;
 
 namespace BergerBytes.App
 {
@@ -16,8 +19,26 @@ namespace BergerBytes.App
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
+
+            // Register services
+            builder.Services.AddSingleton<IMealLogRepository, DatabaseService>();
+            builder.Services.AddSingleton<ISettingsRepository, DatabaseService>();
+            builder.Services.AddSingleton<HttpClient>();
+            builder.Services.AddSingleton<IFoodService, FoodService>();
+
+            // Register pages
+            builder.Services.AddTransient<LogPage>();
+            builder.Services.AddTransient<DashboardPage>();
+            builder.Services.AddTransient<SettingsPage>();
+            builder.Services.AddTransient<AddMealPage>();
+            builder.Services.AddTransient<EditMealPage>();
+            builder.Services.AddTransient<BarcodeScannerPage>();
+            builder.Services.AddTransient<ServingSizePromptPage>();
+
+            // Register ViewModels
+            builder.Services.AddTransient<EditMealPageViewModel>();
 
             return builder.Build();
         }

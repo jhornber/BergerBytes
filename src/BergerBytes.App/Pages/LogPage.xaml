@@ -1,36 +1,310 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="BergerBytes.App.Pages.LogPage"
-             Title="Log">
+             x:Class="BergerBytes.App.Pages.LogPage">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="24,32"
-            Spacing="20">
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="12">
 
-            <Label
-                Text="🍔 Meal Log"
-                FontSize="28"
-                FontAttributes="Bold"
-                TextColor="{StaticResource BrandPrimary}"
-                HorizontalOptions="Start" />
+                <!-- Header Section -->
+                <VerticalStackLayout Spacing="12" Margin="8,16,8,8">
+                    <Label
+                        Text="🍔 Meal Log"
+                        FontSize="28"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource BrandPrimary}"
+                        HorizontalOptions="Start" />
 
-            <Label
-                Text="Track your calories and macros here."
-                FontSize="16"
-                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                    <Button
+                        Text="+ Add Meal"
+                        Command="{Binding AddMealCommand}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="48"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+                </VerticalStackLayout>
 
-            <Button
-                Text="+ Add Meal"
-                BackgroundColor="{StaticResource BrandPrimary}"
-                TextColor="{StaticResource White}"
-                CornerRadius="12"
-                HeightRequest="52"
-                FontAttributes="Bold"
-                FontSize="16" />
+                <!-- Date Navigation -->
+                <Border Stroke="{StaticResource Gray300Brush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12"
+                        Margin="8,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <!-- Previous Day Button -->
+                        <Button Grid.Column="0"
+                                Text="◀"
+                                Command="{Binding PreviousDayCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BrandPrimary}"
+                                FontSize="20"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                Padding="0" />
 
-        </VerticalStackLayout>
-    </ScrollView>
+                        <!-- Date Display -->
+                        <VerticalStackLayout Grid.Column="1" 
+                                            Spacing="2"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center">
+                            <Label Text="{Binding SelectedDateDisplay}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Tap to select date"
+                                   FontSize="11"
+                                   TextColor="{StaticResource Gray600}"
+                                   HorizontalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectDateCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
 
-</ContentPage>
+                        <!-- Next Day Button -->
+                        <Button Grid.Column="2"
+                                Text="▶"
+                                Command="{Binding NextDayCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BrandPrimary}"
+                                FontSize="20"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                Padding="0"
+                                IsEnabled="{Binding CanGoToNextDay}" />
+
+                        <!-- Today Button -->
+                        <Button Grid.Column="3"
+                                Text="Today"
+                                Command="{Binding GoToTodayCommand}"
+                                BackgroundColor="{StaticResource BrandSecondary}"
+                                TextColor="{StaticResource White}"
+                                FontSize="12"
+                                CornerRadius="8"
+                                WidthRequest="60"
+                                HeightRequest="36"
+                                Padding="0"
+                                Margin="8,0,0,0"
+                                IsVisible="{Binding IsToday, Converter={StaticResource InvertedBoolConverter}}" />
+                    </Grid>
+                </Border>
+
+                <!-- Daily Summary -->
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16"
+                        Margin="8,0"
+                        BackgroundColor="{StaticResource BrandPrimary}">
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                        <!-- Daily Total Label -->
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="Daily Total"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource White}" />
+
+                        <!-- Meal Count -->
+                        <Label Grid.Row="0" Grid.Column="1"
+                               Text="{Binding DailyMealCountDisplay}"
+                               FontSize="14"
+                               TextColor="{StaticResource White}"
+                               Opacity="0.9"
+                               VerticalOptions="Center" />
+
+                        <!-- Total Calories -->
+                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                               Text="{Binding DailySummaryCalories}"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource White}"
+                               Margin="0,4,0,0" />
+
+                        <!-- Macros Summary -->
+                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                               Text="{Binding DailySummaryMacros}"
+                               FontSize="14"
+                               TextColor="{StaticResource White}"
+                               Opacity="0.9"
+                               Margin="0,4,0,0" />
+                    </Grid>
+                </Border>
+
+                <!-- Meal List Section -->
+                <VerticalStackLayout Spacing="0" Margin="0,0,0,16"
+                                    BindableLayout.ItemsSource="{Binding MealGroups}">
+                    <BindableLayout.EmptyView>
+                        <Label Text="No meals logged for this day."
+                               FontSize="16"
+                               TextColor="{StaticResource Gray600}"
+                               HorizontalOptions="Center"
+                               Margin="0,32" />
+                    </BindableLayout.EmptyView>
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Delete All"
+                                                  BackgroundColor="Red"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteMealGroupCommand}"
+                                                  CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Border Margin="8,8,8,0" 
+                                        Padding="0"
+                                        Stroke="{StaticResource BrandPrimaryBrush}"
+                                        StrokeThickness="2"
+                                        StrokeShape="RoundRectangle 12"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                    <VerticalStackLayout Spacing="0">
+
+                                        <!-- Meal Header with Summary -->
+                                        <Grid Padding="16,12"
+                                              BackgroundColor="{StaticResource BrandPrimary}">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Meal Type Badge -->
+                                            <Label Grid.Row="0" Grid.Column="0"
+                                                   Text="{Binding MealTypeDisplay}"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource White}" />
+
+                                            <!-- Timestamp -->
+                                            <Label Grid.Row="0" Grid.Column="1"
+                                                   Text="{Binding TimeDisplay}"
+                                                   FontSize="14"
+                                                   TextColor="{StaticResource White}"
+                                                   Opacity="0.9"
+                                                   VerticalOptions="Center" />
+
+                                            <!-- Total Calories -->
+                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   Text="{Binding CaloriesSummary}"
+                                                   FontSize="20"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource White}"
+                                                   Margin="0,4,0,0" />
+
+                                            <!-- Macros Summary -->
+                                            <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   Text="{Binding MacrosSummary}"
+                                                   FontSize="14"
+                                                   TextColor="{StaticResource White}"
+                                                   Opacity="0.9"
+                                                   Margin="0,4,0,0" />
+
+                                            <!-- Edit Button -->
+                                            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   Text="✏️ Edit Meal"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditMealCommand}"
+                                                   CommandParameter="{Binding .}"
+                                                   BackgroundColor="{StaticResource White}"
+                                                   TextColor="{StaticResource BrandPrimary}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   CornerRadius="8"
+                                                   HeightRequest="36"
+                                                   Margin="0,12,0,0" />
+                                        </Grid>
+
+                                        <!-- Item Count Badge -->
+                                        <Border Margin="16,8"
+                                                Padding="8,4"
+                                                Stroke="{StaticResource Gray400Brush}"
+                                                StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 6"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}"
+                                                HorizontalOptions="Start">
+                                            <Label Text="{Binding ItemCountDisplay}"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Gray600}" />
+                                        </Border>
+
+                                        <!-- Food Items List -->
+                                        <VerticalStackLayout Padding="16,0,16,16" Spacing="8"
+                                                            BindableLayout.ItemsSource="{Binding Items}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <SwipeView>
+                                                        <SwipeView.RightItems>
+                                                            <SwipeItems>
+                                                                <SwipeItem Text="Delete"
+                                                                          BackgroundColor="OrangeRed"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteItemCommand}"
+                                                                          CommandParameter="{Binding .}" />
+                                                            </SwipeItems>
+                                                        </SwipeView.RightItems>
+
+                                                        <Border Padding="12"
+                                                                Stroke="{StaticResource Gray300Brush}"
+                                                                StrokeThickness="1"
+                                                                StrokeShape="RoundRectangle 8"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+
+                                                                <!-- Food Name -->
+                                                                <Label Grid.Row="0" Grid.Column="0"
+                                                                       Text="{Binding FoodName}"
+                                                                       FontSize="16"
+                                                                       FontAttributes="Bold" />
+
+                                                                                                                            <!-- Calories -->
+                                                                                                                            <Label Grid.Row="0" Grid.Column="1"
+                                                                                                                                   Text="{Binding Calories, StringFormat='{0:F0} cal'}"
+                                                                                                                                   FontSize="14"
+                                                                                                                                   FontAttributes="Bold"
+                                                                                                                                   TextColor="{StaticResource BrandPrimary}"
+                                                                                                                                   VerticalOptions="Center" />
+
+                                                                                                                            <!-- Macros -->
+                                                                                                                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                                                                                                                                 Spacing="12" 
+                                                                                                                                                 Margin="0,4,0,0">
+                                                                                                                                <Label Text="{Binding Protein, StringFormat='P: {0:F1}g'}" 
+                                                                                                                                       FontSize="13"
+                                                                                                                                       TextColor="{StaticResource Gray600}" />
+                                                                                                                                <Label Text="{Binding Carbs, StringFormat='C: {0:F1}g'}" 
+                                                                                                                                       FontSize="13"
+                                                                                                                                       TextColor="{StaticResource Gray600}" />
+                                                                                                                                <Label Text="{Binding Fat, StringFormat='F: {0:F1}g'}" 
+                                                                                                                                       FontSize="13"
+                                                                                                                                       TextColor="{StaticResource Gray600}" />
+                                                                                                                            </HorizontalStackLayout>
+
+                                                                                                                        </Grid>
+                                                                                                                    </Border>
+                                                                                                                </SwipeView>
+                                                                                                            </DataTemplate>
+                                                                                                        </BindableLayout.ItemTemplate>
+                                                                                                    </VerticalStackLayout>
+
+                                                                                                </VerticalStackLayout>
+                                                                                            </Border>
+                                                                                        </SwipeView>
+                                                                                    </DataTemplate>
+                                                                                </BindableLayout.ItemTemplate>
+                                                                                                            </VerticalStackLayout>
+
+                                                                                        </VerticalStackLayout>
+                                                                                    </ScrollView>
+                                                                                </RefreshView>
+
+                                                                            </ContentPage>

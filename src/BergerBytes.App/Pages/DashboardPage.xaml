@@ -1,85 +1,104 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="BergerBytes.App.Pages.DashboardPage"
-             Title="Dashboard">
+             x:Class="BergerBytes.App.Pages.DashboardPage">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="24,32"
-            Spacing="20">
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}">
+        <ScrollView>
+            <VerticalStackLayout
+                Padding="24,32"
+                Spacing="20">
 
-            <Label
-                Text="📊 Dashboard"
-                FontSize="28"
-                FontAttributes="Bold"
-                TextColor="{StaticResource BrandPrimary}"
-                HorizontalOptions="Start" />
+                <Label
+                    Text="📊 Dashboard"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource BrandPrimary}"
+                    HorizontalOptions="Start" />
 
-            <Label
-                Text="Your daily nutrition overview."
-                FontSize="16"
-                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Label
+                    Text="Your daily nutrition overview."
+                    FontSize="16"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
 
-            <Border
-                Stroke="{StaticResource BrandSecondaryBrush}"
-                StrokeThickness="2"
-                StrokeShape="RoundRectangle 12"
-                Padding="20">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Calories Today" FontSize="14"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
-                    <Label Text="0 / 2000 kcal" FontSize="24" FontAttributes="Bold"
-                           TextColor="{StaticResource BrandSecondary}" />
-                </VerticalStackLayout>
-            </Border>
+                <!-- Calories Card -->
+                <Border
+                    Stroke="{StaticResource BrandSecondaryBrush}"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="20">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Calories Today" FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                        <Label Text="{Binding CaloriesDisplay}" FontSize="24" FontAttributes="Bold"
+                               TextColor="{StaticResource BrandSecondary}" />
 
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                <Border Grid.Column="0"
-                        Stroke="{StaticResource BrandPrimaryBrush}"
-                        StrokeThickness="2"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Protein" FontSize="12"
+                        <!-- Progress Bar - Only show if goal is set -->
+                        <ProgressBar Progress="{Binding CaloriesPercentage}" 
+                                     ProgressColor="{StaticResource BrandSecondary}"
+                                     HeightRequest="8"
+                                     Margin="0,8,0,0"
+                                     IsVisible="{Binding IsCalorieGoalSet}" />
+
+                        <Label Text="{Binding CaloriesPercentage, StringFormat='{0:F0}% of daily goal'}" 
+                               FontSize="12"
                                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
-                               HorizontalOptions="Center" />
-                        <Label Text="0g" FontSize="18" FontAttributes="Bold"
-                               TextColor="{StaticResource BrandPrimary}"
-                               HorizontalOptions="Center" />
+                               IsVisible="{Binding IsCalorieGoalSet}" />
                     </VerticalStackLayout>
                 </Border>
-                <Border Grid.Column="1"
-                        Stroke="{StaticResource BrandPrimaryBrush}"
-                        StrokeThickness="2"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Carbs" FontSize="12"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
-                               HorizontalOptions="Center" />
-                        <Label Text="0g" FontSize="18" FontAttributes="Bold"
-                               TextColor="{StaticResource BrandPrimary}"
-                               HorizontalOptions="Center" />
-                    </VerticalStackLayout>
-                </Border>
-                <Border Grid.Column="2"
-                        Stroke="{StaticResource BrandPrimaryBrush}"
-                        StrokeThickness="2"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Fat" FontSize="12"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
-                               HorizontalOptions="Center" />
-                        <Label Text="0g" FontSize="18" FontAttributes="Bold"
-                               TextColor="{StaticResource BrandPrimary}"
-                               HorizontalOptions="Center" />
-                    </VerticalStackLayout>
-                </Border>
-            </Grid>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Macros Grid -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                    <Border Grid.Column="0"
+                            Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Protein" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding ProteinDisplay}" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandPrimary}"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1"
+                            Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Carbs" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding CarbsDisplay}" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandPrimary}"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="2"
+                            Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Fat" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding FatDisplay}" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandPrimary}"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
 
 </ContentPage>

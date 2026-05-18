@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BergerBytes.App.Pages.ServingSizePromptPage"
+             Title="Serving Size"
+             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="24">
+
+            <!-- Product Info -->
+            <Border 
+                Stroke="{StaticResource BrandPrimaryBrush}"
+                StrokeThickness="2"
+                StrokeShape="RoundRectangle 12"
+                Padding="16"
+                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                <VerticalStackLayout Spacing="12">
+                    <!-- Product Image -->
+                    <Image 
+                        x:Name="ProductImage"
+                        HeightRequest="120"
+                        Aspect="AspectFit"
+                        IsVisible="False"
+                        Margin="0,0,0,8" />
+
+                    <Label 
+                        x:Name="ProductNameLabel"
+                        Text="{Binding ProductName}"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource BrandPrimary}"
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label 
+                        x:Name="BarcodeLabel"
+                        Text="{Binding Barcode, StringFormat='Barcode: {0}'}"
+                        FontSize="14"
+                        TextColor="{StaticResource Gray600}"
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Serving Size Input Section -->
+            <VerticalStackLayout Spacing="16">
+                <Label 
+                    Text="How much did you eat?"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource BrandPrimary}" />
+
+                <!-- Quantity Entry -->
+                <VerticalStackLayout Spacing="8">
+                    <Label 
+                        Text="Quantity"
+                        FontSize="16" />
+                    <Entry 
+                        x:Name="QuantityEntry"
+                        Text="{Binding Quantity}"
+                        Keyboard="Numeric"
+                        Placeholder="e.g., 1, 2.5"
+                        FontSize="18"
+                        HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+
+                <!-- Unit Picker -->
+                <VerticalStackLayout Spacing="8">
+                    <Label 
+                        Text="Unit"
+                        FontSize="16" />
+                    <Picker 
+                        x:Name="UnitPicker"
+                        SelectedIndex="{Binding SelectedUnitIndex}"
+                        FontSize="18"
+                        HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+
+                <!-- Recommended Serving Size Hint -->
+                <Border 
+                    x:Name="ServingSizeHint"
+                    IsVisible="{Binding HasServingSizeInfo}"
+                    Stroke="{StaticResource Gray300Brush}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label 
+                            Text="💡"
+                            FontSize="20"
+                            VerticalOptions="Center" />
+                        <Label 
+                            Text="{Binding ServingSizeHintText}"
+                            FontSize="14"
+                            TextColor="{StaticResource Gray600}"
+                            VerticalOptions="Center"
+                            LineBreakMode="WordWrap" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Calculated Nutrition Preview -->
+                <Border 
+                    x:Name="NutritionPreview"
+                    IsVisible="{Binding ShowNutritionPreview}"
+                    Stroke="{StaticResource BrandSecondaryBrush}"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="Nutrition Preview"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource BrandSecondary}" />
+
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="4">
+                            <Label Grid.Row="0" Grid.Column="0" Text="Calories:" FontSize="14" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding PreviewCalories, StringFormat='{0:F0} kcal'}" FontSize="14" FontAttributes="Bold" />
+
+                            <Label Grid.Row="1" Grid.Column="0" Text="Protein:" FontSize="14" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding PreviewProtein, StringFormat='{0:F1} g'}" FontSize="14" />
+
+                            <Label Grid.Row="2" Grid.Column="0" Text="Carbs:" FontSize="14" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding PreviewCarbs, StringFormat='{0:F1} g'}" FontSize="14" />
+
+                            <Label Grid.Row="3" Grid.Column="0" Text="Fat:" FontSize="14" />
+                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding PreviewFat, StringFormat='{0:F1} g'}" FontSize="14" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Action Buttons -->
+            <VerticalStackLayout Spacing="12" Margin="0,12,0,0">
+                <Button 
+                    Text="✓ Add to Meal"
+                    Clicked="OnAddToMealClicked"
+                    BackgroundColor="{StaticResource BrandSecondary}"
+                    TextColor="White"
+                    FontSize="18"
+                    CornerRadius="12"
+                    HeightRequest="54" />
+
+                <Button 
+                    Text="✕ Cancel"
+                    Clicked="OnCancelClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource BrandPrimary}"
+                    BorderColor="{StaticResource BrandPrimary}"
+                    BorderWidth="2"
+                    FontSize="18"
+                    CornerRadius="12"
+                    HeightRequest="54" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
