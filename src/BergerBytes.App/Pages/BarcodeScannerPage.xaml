@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:scanner="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
+             x:Class="BergerBytes.App.Pages.BarcodeScannerPage"
+             Title="Scan Barcode"
+             BackgroundColor="Black">
+
+    <Grid>
+        <!-- Camera View -->
+        <scanner:CameraView 
+            x:Name="cameraView"
+            OnDetectionFinished="OnBarcodesDetected" />
+
+        <!-- Overlay with instructions and cancel button -->
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- Top Instructions -->
+            <Grid 
+                Grid.Row="0"
+                Padding="20"
+                BackgroundColor="#CC000000">
+                <VerticalStackLayout Spacing="8">
+                    <Label 
+                        Text="📷 Scan Barcode" 
+                        TextColor="White" 
+                        FontSize="28" 
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center" />
+                    <Label 
+                        Text="Position the barcode within the frame" 
+                        TextColor="White" 
+                        FontSize="16" 
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Scanning Frame/Viewfinder -->
+            <Border
+                Grid.Row="1"
+                HorizontalOptions="Fill"
+                Margin="24"
+                StrokeThickness="3"
+                Stroke="White"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="Transparent"
+                Opacity="0.8">
+                <Label 
+                    Text="🔍" 
+                    FontSize="48" 
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center"
+                    TextColor="White"
+                    Opacity="0.6" />
+            </Border>
+
+            <!-- Bottom Cancel Button -->
+            <Grid 
+                Grid.Row="2"
+                Padding="20"
+                BackgroundColor="#CC000000">
+                <Button 
+                    Text="✕ Cancel"
+                    Clicked="OnCancelClicked"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    FontSize="18"
+                    CornerRadius="12"
+                    HeightRequest="50"
+                    HorizontalOptions="Fill" />
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentPage>

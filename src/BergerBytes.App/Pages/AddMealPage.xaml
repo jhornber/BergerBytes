@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:System="clr-namespace:System;assembly=netstandard"
+             x:Class="BergerBytes.App.Pages.AddMealPage"
+             Title="Add Meal">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+
+            <!-- Header -->
+            <Label Text="🍔 Log Your Meal" 
+                   FontSize="28" 
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource BrandPrimary}" />
+
+            <!-- Meal Type Selection -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Meal Type" FontSize="16" FontAttributes="Bold" />
+                <Picker x:Name="MealTypePicker"
+                        SelectedIndex="{Binding SelectedMealTypeIndex}"
+                        Title="Select Meal Type"
+                        FontSize="16">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>🌅 Breakfast</x:String>
+                            <x:String>☀️ Lunch</x:String>
+                            <x:String>🌙 Dinner</x:String>
+                            <x:String>🍽️ Other</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+            </VerticalStackLayout>
+
+            <!-- Date and Time Selection -->
+            <Border Stroke="{StaticResource Gray300Brush}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📅 When did you eat this?" 
+                           FontSize="16" 
+                           FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <!-- Date Picker -->
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Date" FontSize="14" />
+                            <DatePicker Date="{Binding MealDate}"
+                                       Format="MMM dd, yyyy"
+                                       FontSize="16"
+                                       MaximumDate="{x:Static System:DateTime.Today}" />
+                        </VerticalStackLayout>
+
+                        <!-- Time Picker -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Time" FontSize="14" />
+                            <TimePicker Time="{Binding MealTime}"
+                                       Format="h:mm tt"
+                                       FontSize="16" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+            <!-- Food Items Section -->
+            <VerticalStackLayout Spacing="12">
+                <HorizontalStackLayout Spacing="8" HorizontalOptions="StartAndExpand">
+                    <Label Text="Food Items" FontSize="20" FontAttributes="Bold" VerticalOptions="Center" />
+                    <Label Text="{Binding FoodEntries.Count, StringFormat='({0})'}" 
+                           FontSize="16" 
+                           TextColor="{StaticResource Gray600}"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Current Food Entry Form -->
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Add Food Item" FontSize="16" FontAttributes="Bold" />
+
+                        <!-- Scanned Barcode Display -->
+                        <Border IsVisible="{Binding HasScannedBarcode}"
+                                Stroke="{StaticResource BrandSecondaryBrush}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="12"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" 
+                                       Text="|||" 
+                                       FontSize="20" 
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding ScannedBarcode, StringFormat='Barcode: {0}'}"
+                                       FontSize="14"
+                                       TextColor="{StaticResource Gray600}"
+                                       VerticalOptions="Center" />
+                                <Button Grid.Column="2"
+                                        Text="?"
+                                        Command="{Binding ClearBarcodeCommand}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{StaticResource Gray600}"
+                                        Padding="4"
+                                        WidthRequest="32"
+                                        HeightRequest="32" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Scan Barcode Button -->
+                        <Button Text="Scan Barcode"
+                                Command="{Binding ScanBarcodeCommand}"
+                                BackgroundColor="{StaticResource BrandPrimary}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="44"
+                                IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
+
+                        <!-- Loading Indicator -->
+                        <ActivityIndicator IsRunning="{Binding IsLoadingProduct}"
+                                          IsVisible="{Binding IsLoadingProduct}"
+                                          Color="{StaticResource BrandPrimary}"
+                                          HeightRequest="40" />
+
+                        <BoxView HeightRequest="1" 
+                                 Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                 Margin="0,8,0,8" />
+
+                        <!-- Food Name (Required) -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Food Name *" FontSize="14" TextColor="{StaticResource BrandPrimary}" />
+                            <Entry Text="{Binding CurrentFoodName}" 
+                                   Placeholder="e.g., Chicken Breast"
+                                   FontSize="16" />
+                        </VerticalStackLayout>
+
+                        <!-- Calories (Required) -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Calories *" FontSize="14" TextColor="{StaticResource BrandPrimary}" />
+                            <Entry Text="{Binding CurrentCalories}" 
+                                   Keyboard="Numeric"
+                                   Placeholder="e.g., 250"
+                                   FontSize="16" />
+                        </VerticalStackLayout>
+
+                        <!-- Macros (Optional) -->
+                        <Label Text="Macros (Optional)" FontSize="14" FontAttributes="Italic" TextColor="{StaticResource Gray600}" />
+
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <!-- Protein -->
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Protein (g)" FontSize="12" />
+                                <Entry Text="{Binding CurrentProtein}" 
+                                       Keyboard="Numeric"
+                                       Placeholder="0"
+                                       FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <!-- Carbs -->
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Carbs (g)" FontSize="12" />
+                                <Entry Text="{Binding CurrentCarbs}" 
+                                       Keyboard="Numeric"
+                                       Placeholder="0"
+                                       FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <!-- Fat -->
+                            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                <Label Text="Fat (g)" FontSize="12" />
+                                <Entry Text="{Binding CurrentFat}" 
+                                       Keyboard="Numeric"
+                                       Placeholder="0"
+                                       FontSize="14" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Add Item Button -->
+                        <Button Text="+ Add This Item"
+                                Command="{Binding AddFoodItemCommand}"
+                                BackgroundColor="{StaticResource BrandSecondary}"
+                                TextColor="{StaticResource White}"
+                                CornerRadius="8"
+                                HeightRequest="44"
+                                Margin="0,8,0,0" />
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Added Items List -->
+                <CollectionView ItemsSource="{Binding FoodEntries}"
+                               EmptyView="No items added yet">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Remove"
+                                                  BackgroundColor="Red"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveFoodItemCommand}"
+                                                  CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Border Stroke="{StaticResource Gray300}"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 8"
+                                        Padding="12"
+                                        Margin="0,4"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                                        <Label Grid.Row="0" Grid.Column="0"
+                                               Text="{Binding Name}"
+                                               FontSize="16"
+                                               FontAttributes="Bold" />
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               Text="{Binding CaloriesText, StringFormat='{0} cal'}"
+                                               FontSize="14"
+                                               TextColor="{StaticResource BrandSecondary}"
+                                               VerticalOptions="Center" />
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               FontSize="12"
+                                               TextColor="{StaticResource Gray600}"
+                                               Margin="0,4,0,0">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="P: " />
+                                                    <Span Text="{Binding ProteinText}" />
+                                                    <Span Text="g  C: " />
+                                                    <Span Text="{Binding CarbsText}" />
+                                                    <Span Text="g  F: " />
+                                                    <Span Text="{Binding FatText}" />
+                                                    <Span Text="g" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+
+            <!-- Total Summary -->
+            <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource BrandPrimary}, Dark={StaticResource BrandPrimary}}"
+                    IsVisible="{Binding HasFoodEntries}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Meal Total" 
+                           FontSize="18" 
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource White}" />
+                    <Label FontSize="16" TextColor="{StaticResource White}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding TotalCalories, StringFormat='{0:F0} calories'}" FontAttributes="Bold" />
+                                <Span Text="  |  P: " />
+                                <Span Text="{Binding TotalProtein, StringFormat='{0:F1}g'}" />
+                                <Span Text="  C: " />
+                                <Span Text="{Binding TotalCarbs, StringFormat='{0:F1}g'}" />
+                                <Span Text="  F: " />
+                                <Span Text="{Binding TotalFat, StringFormat='{0:F1}g'}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,12,0,24">
+                <Button Grid.Column="0"
+                        Text="Cancel"
+                        Command="{Binding CancelCommand}"
+                        BackgroundColor="{StaticResource Gray400}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="52" />
+                <Button Grid.Column="1"
+                        Text="Save Meal"
+                        Command="{Binding SaveMealCommand}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="52"
+                        FontAttributes="Bold" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
