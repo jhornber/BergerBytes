@@ -1,14 +1,17 @@
-using ZXing.Net.Maui;
+using BarcodeScanning;
 
 namespace BergerBytes.App.Pages
 {
     public partial class BarcodeScannerPage : ContentPage
     {
-        private bool _hasScanned = false;
+        private bool _hasScanned;
+        private bool _isReady;
 
         public BarcodeScannerPage()
         {
             InitializeComponent();
+
+            //cameraView.BarcodeSymbologies = BarcodeFormats.OneDCode;
         }
 
         protected override async void OnAppearing()
@@ -17,74 +20,81 @@ namespace BergerBytes.App.Pages
 
             // Check camera permissions
             var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            var vibrateStatus = await Permissions.CheckStatusAsync<Permissions.Vibrate>();
 
             if (status != PermissionStatus.Granted)
             {
                 status = await Permissions.RequestAsync<Permissions.Camera>();
             }
 
+            if (vibrateStatus != PermissionStatus.Granted)
+            {
+                vibrateStatus = await Permissions.RequestAsync<Permissions.Vibrate>();
+            }
+
             if (status != PermissionStatus.Granted)
             {
-                await DisplayAlert("Camera Permission Required", 
+                await DisplayAlertAsync("Camera Permission Required", 
                     "Camera access is needed to scan barcodes. Please enable camera permissions in your device settings.", 
                     "OK");
                 await Shell.Current.GoToAsync("..");
                 return;
             }
 
-            // Start detecting
-            CameraView.IsDetecting = true;
+            cameraView.CameraEnabled = true;
+
+            // Brief delay so the user can position the camera before capture begins
+            await Task.Delay(1700);
+            _isReady = true;
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            CameraView.IsDetecting = false;
+            cameraView.CameraEnabled = false;
+            _isReady = false;
         }
 
-        private async void OnBarcodesDetected(object sender, BarcodeDetectionEventArgs e)
+        private async void OnBarcodesDetected(object sender, OnDetectionFinishedEventArg e)
         {
-            // Prevent multiple scans
-            if (_hasScanned)
+            // Prevent scans before ready or multiple scans
+            if (!_isReady || _hasScanned)
                 return;
 
-            var barcode = e.Results?.FirstOrDefault();
-            if (barcode == null)
-                return;
-
-            _hasScanned = true;
-            CameraView.IsDetecting = false;
-
-            // Haptic feedback
-            try
+            if(e.BarcodeResults.Count > 0)
             {
-#if ANDROID || IOS
-                HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-#endif
-            }
-            catch
+                var barcode = e.BarcodeResults?.FirstOrDefault();
+                if (barcode == null)
+                    return;
+
+                _hasScanned = true;
+                MainThread.BeginInvokeOnMainThread(() => cameraView.CameraEnabled = false);
+
+
+                // Navigate back with the barcode
+                await Shell.Current.GoToAsync("..", new Dictionary<string, object>
             {
-                // Fallback to vibration if haptic feedback not available
+                { "ScannedBarcode", barcode.DisplayValue }
+            });
+
+                // Vibrate on successful scan
                 try
                 {
-                    Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                    Vibration.Vibrate(TimeSpan.FromMilliseconds(200));
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignore if vibration not available
+                    // Log vibration error (could use ILogger here in future)
+                    System.Diagnostics.Debug.WriteLine($"Vibration error: {ex.Message}");
                 }
             }
 
-            // Navigate back with the barcode
-            await Shell.Current.GoToAsync("..", new Dictionary<string, object>
-            {
-                { "ScannedBarcode", barcode.Value }
-            });
+            
         }
 
         private async void OnCancelClicked(object sender, EventArgs e)
         {
-            CameraView.IsDetecting = false;
+            cameraView.CameraEnabled = false;
             await Shell.Current.GoToAsync("..");
         }
     }

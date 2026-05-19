@@ -94,7 +94,7 @@
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                 <Label Grid.Column="0" 
-                                       Text="???" 
+                                       Text="|||" 
                                        FontSize="20" 
                                        VerticalOptions="Center" />
                                 <Label Grid.Column="1"
@@ -114,7 +114,7 @@
                         </Border>
 
                         <!-- Scan Barcode Button -->
-                        <Button Text="?? Scan Barcode"
+                        <Button Text="Scan Barcode"
                                 Command="{Binding ScanBarcodeCommand}"
                                 BackgroundColor="{StaticResource BrandPrimary}"
                                 TextColor="White"

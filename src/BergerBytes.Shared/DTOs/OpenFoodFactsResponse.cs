@@ -36,7 +36,10 @@ namespace BergerBytes.Shared.DTOs
         public string? ServingSize { get; set; }
 
         [JsonPropertyName("serving_quantity")]
-        public string? ServingQuantity { get; set; }
+        public double? ServingQuantity { get; set; }
+
+        [JsonPropertyName("serving_quantity_unit")]
+        public string? ServingQuantityUnit { get; set; }
 
         [JsonPropertyName("nutriments")]
         public Nutriments? Nutriments { get; set; }

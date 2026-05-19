@@ -62,6 +62,10 @@ namespace BergerBytes.App.ViewModels
             {
                 _darkModeEnabled = value;
                 OnPropertyChanged();
+                if (Application.Current != null)
+                    Application.Current.UserAppTheme = value ? AppTheme.Dark : AppTheme.Light;
+                _settings.DarkModeEnabled = value;
+                _ = _settingsRepository.SaveSettingsAsync(_settings);
             }
         }
 
@@ -92,7 +96,12 @@ namespace BergerBytes.App.ViewModels
             DailyProteinGoalText = _settings.DailyProteinGoal > 0 ? _settings.DailyProteinGoal.ToString("F0") : string.Empty;
             DailyCarbsGoalText = _settings.DailyCarbsGoal > 0 ? _settings.DailyCarbsGoal.ToString("F0") : string.Empty;
             DailyFatGoalText = _settings.DailyFatGoal > 0 ? _settings.DailyFatGoal.ToString("F0") : string.Empty;
-            DarkModeEnabled = _settings.DarkModeEnabled;
+
+            // Set backing field directly to apply theme on load without triggering a redundant save
+            _darkModeEnabled = _settings.DarkModeEnabled;
+            OnPropertyChanged(nameof(DarkModeEnabled));
+            if (Application.Current != null)
+                Application.Current.UserAppTheme = _darkModeEnabled ? AppTheme.Dark : AppTheme.Light;
         }
 
         private async Task SaveSettingsAsync()
@@ -105,16 +114,15 @@ namespace BergerBytes.App.ViewModels
                 _settings.DailyProteinGoal = ParseGoalValue(DailyProteinGoalText);
                 _settings.DailyCarbsGoal = ParseGoalValue(DailyCarbsGoalText);
                 _settings.DailyFatGoal = ParseGoalValue(DailyFatGoalText);
-                _settings.DarkModeEnabled = DarkModeEnabled;
 
                 await _settingsRepository.SaveSettingsAsync(_settings);
 
                 // Show success message
-                await Application.Current!.MainPage!.DisplayAlert("Success", "Settings saved successfully!", "OK");
+                await Application.Current!.MainPage!.DisplayAlertAsync("Success", "Settings saved successfully!", "OK");
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", $"Failed to save settings: {ex.Message}", "OK");
+                await Application.Current!.MainPage!.DisplayAlertAsync("Error", $"Failed to save settings: {ex.Message}", "OK");
             }
             finally
             {

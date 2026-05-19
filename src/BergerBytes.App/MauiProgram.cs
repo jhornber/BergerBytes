@@ -2,6 +2,7 @@
 using BergerBytes.App.Services;
 using BergerBytes.App.Pages;
 using BergerBytes.App.ViewModels;
+using BarcodeScanning;
 
 namespace BergerBytes.App
 {
@@ -12,6 +13,7 @@ namespace BergerBytes.App
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseBarcodeScanning()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -27,6 +29,7 @@ namespace BergerBytes.App
             builder.Services.AddSingleton<ISettingsRepository, DatabaseService>();
             builder.Services.AddSingleton<HttpClient>();
             builder.Services.AddSingleton<IFoodService, FoodService>();
+            builder.Services.AddSingleton<App>();
 
             // Register pages
             builder.Services.AddTransient<LogPage>();

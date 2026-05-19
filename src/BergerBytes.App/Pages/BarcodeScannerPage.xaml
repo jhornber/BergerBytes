@@ -1,37 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI"
+             xmlns:scanner="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
              x:Class="BergerBytes.App.Pages.BarcodeScannerPage"
              Title="Scan Barcode"
              BackgroundColor="Black">
 
     <Grid>
         <!-- Camera View -->
-        <zxing:CameraBarcodeReaderView 
-            x:Name="CameraView"
-            IsDetecting="True"
-            BarcodesDetected="OnBarcodesDetected">
-            <zxing:CameraBarcodeReaderView.BarcodesOptions>
-                <zxing:BarcodeReaderOptions 
-                    Formats="UpcA,Ean13"
-                    AutoRotate="True"
-                    TryHarder="True"
-                    TryInverted="True"
-                    Multiple="False" />
-            </zxing:CameraBarcodeReaderView.BarcodesOptions>
-        </zxing:CameraBarcodeReaderView>
+        <scanner:CameraView 
+            x:Name="cameraView"
+            OnDetectionFinished="OnBarcodesDetected" />
 
         <!-- Overlay with instructions and cancel button -->
-        <VerticalStackLayout 
-            VerticalOptions="Fill"
-            HorizontalOptions="Fill">
+        <Grid RowDefinitions="Auto,*,Auto">
 
             <!-- Top Instructions -->
             <Grid 
+                Grid.Row="0"
                 Padding="20"
-                BackgroundColor="#CC000000"
-                VerticalOptions="Start">
+                BackgroundColor="#CC000000">
                 <VerticalStackLayout Spacing="8">
                     <Label 
                         Text="📷 Scan Barcode" 
@@ -49,13 +37,12 @@
 
             <!-- Scanning Frame/Viewfinder -->
             <Border
-                VerticalOptions="Center"
-                HorizontalOptions="Center"
+                Grid.Row="1"
+                HorizontalOptions="Fill"
+                Margin="24"
                 StrokeThickness="3"
                 Stroke="White"
                 StrokeShape="RoundRectangle 12"
-                WidthRequest="280"
-                HeightRequest="140"
                 BackgroundColor="Transparent"
                 Opacity="0.8">
                 <Label 
@@ -69,9 +56,9 @@
 
             <!-- Bottom Cancel Button -->
             <Grid 
+                Grid.Row="2"
                 Padding="20"
-                BackgroundColor="#CC000000"
-                VerticalOptions="End">
+                BackgroundColor="#CC000000">
                 <Button 
                     Text="✕ Cancel"
                     Clicked="OnCancelClicked"
@@ -82,6 +69,6 @@
                     HeightRequest="50"
                     HorizontalOptions="Fill" />
             </Grid>
-        </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

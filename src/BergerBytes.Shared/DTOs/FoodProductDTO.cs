@@ -15,6 +15,10 @@ namespace BergerBytes.Shared.DTOs
         public double? ServingSizeGrams { get; set; }
         public string? ServingSizeText { get; set; } // e.g., "1 cup", "1 bar"
 
+        // Density in g/mL derived from serving data; used for accurate volumetric unit conversions.
+        // Null means density is unknown; callers should fall back to water density (1.0 g/mL).
+        public double? DensityGPerMl { get; set; }
+
         // Calculate macros for a specific serving size in grams
         public double CalculateCaloriesForServing(double grams)
         {

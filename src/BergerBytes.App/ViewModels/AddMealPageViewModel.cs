@@ -119,6 +119,12 @@ namespace BergerBytes.App.ViewModels
             get => _scannedBarcodeValue;
             set
             {
+                // Guard against MAUI Shell re-applying the same query property value when
+                // AddMealPage becomes active again after popping a child route (e.g. ServingSizePromptPage).
+                // Without this, re-application would trigger HandleScannedBarcodeAsync again,
+                // causing a navigation loop back to ServingSizePromptPage.
+                if (_scannedBarcodeValue == value) return;
+
                 _scannedBarcodeValue = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(HasScannedBarcode));
@@ -234,7 +240,7 @@ namespace BergerBytes.App.ViewModels
                 else
                 {
                     // Product not found, allow manual entry with barcode displayed
-                    await Application.Current!.MainPage!.DisplayAlert(
+                    await Application.Current!.MainPage!.DisplayAlertAsync(
                         "Product Not Found",
                         $"Barcode {barcode} was not found in the database. You can enter the nutrition information manually below.",
                         "OK");
@@ -242,7 +248,7 @@ namespace BergerBytes.App.ViewModels
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert(
+                await Application.Current!.MainPage!.DisplayAlertAsync(
                     "Error",
                     $"Failed to lookup product: {ex.Message}. You can enter the information manually.",
                     "OK");
@@ -263,13 +269,13 @@ namespace BergerBytes.App.ViewModels
             // Validate required fields
             if (string.IsNullOrWhiteSpace(CurrentFoodName))
             {
-                Application.Current?.MainPage?.DisplayAlert("Validation", "Please enter a food name.", "OK");
+                Application.Current?.MainPage?.DisplayAlertAsync("Validation", "Please enter a food name.", "OK");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(CurrentCalories))
             {
-                Application.Current?.MainPage?.DisplayAlert("Validation", "Please enter calories.", "OK");
+                Application.Current?.MainPage?.DisplayAlertAsync("Validation", "Please enter calories.", "OK");
                 return;
             }
 
@@ -284,7 +290,7 @@ namespace BergerBytes.App.ViewModels
 
             if (!foodEntry.IsValid)
             {
-                Application.Current?.MainPage?.DisplayAlert("Validation", "Please check your entries and try again.", "OK");
+                Application.Current?.MainPage?.DisplayAlertAsync("Validation", "Please check your entries and try again.", "OK");
                 return;
             }
 
@@ -310,7 +316,7 @@ namespace BergerBytes.App.ViewModels
         {
             if (FoodEntries.Count == 0)
             {
-                await Application.Current!.MainPage!.DisplayAlert("No Items", "Please add at least one food item.", "OK");
+                await Application.Current!.MainPage!.DisplayAlertAsync("No Items", "Please add at least one food item.", "OK");
                 return;
             }
 
@@ -340,7 +346,7 @@ namespace BergerBytes.App.ViewModels
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", $"Failed to save meal: {ex.Message}", "OK");
+                await Application.Current!.MainPage!.DisplayAlertAsync("Error", $"Failed to save meal: {ex.Message}", "OK");
             }
         }
 
@@ -348,7 +354,7 @@ namespace BergerBytes.App.ViewModels
         {
             if (FoodEntries.Count > 0)
             {
-                bool confirm = await Application.Current!.MainPage!.DisplayAlert(
+                bool confirm = await Application.Current!.MainPage!.DisplayAlertAsync(
                     "Discard Changes?",
                     "You have unsaved items. Are you sure you want to cancel?",
                     "Yes", "No");

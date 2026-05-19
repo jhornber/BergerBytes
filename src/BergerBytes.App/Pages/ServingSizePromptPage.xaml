@@ -18,10 +18,10 @@
                 <VerticalStackLayout Spacing="12">
                     <!-- Product Image -->
                     <Image 
-                        x:Name="ProductImage"
                         HeightRequest="120"
                         Aspect="AspectFit"
-                        IsVisible="False"
+                        Source="{Binding ImageUrl}"
+                        IsVisible="{Binding ImageVisible}"
                         Margin="0,0,0,8" />
 
                     <Label 
@@ -56,7 +56,6 @@
                         Text="Quantity"
                         FontSize="16" />
                     <Entry 
-                        x:Name="QuantityEntry"
                         Text="{Binding Quantity}"
                         Keyboard="Numeric"
                         Placeholder="e.g., 1, 2.5"
@@ -70,7 +69,7 @@
                         Text="Unit"
                         FontSize="16" />
                     <Picker 
-                        x:Name="UnitPicker"
+                        ItemsSource="{Binding Units}"
                         SelectedIndex="{Binding SelectedUnitIndex}"
                         FontSize="18"
                         HorizontalOptions="Fill" />
@@ -136,7 +135,7 @@
             <VerticalStackLayout Spacing="12" Margin="0,12,0,0">
                 <Button 
                     Text="✓ Add to Meal"
-                    Clicked="OnAddToMealClicked"
+                    Command="{Binding AddToMealCommand}"
                     BackgroundColor="{StaticResource BrandSecondary}"
                     TextColor="White"
                     FontSize="18"
@@ -145,7 +144,7 @@
 
                 <Button 
                     Text="✕ Cancel"
-                    Clicked="OnCancelClicked"
+                    Command="{Binding CancelCommand}"
                     BackgroundColor="Transparent"
                     TextColor="{StaticResource BrandPrimary}"
                     BorderColor="{StaticResource BrandPrimary}"

@@ -99,7 +99,7 @@
                 </Border>
 
                 <!-- Scan Barcode Button -->
-                <Button Text="?? Scan Barcode to Add Item"
+                <Button Text="Scan Barcode to Add Item"
                         Command="{Binding ScanBarcodeCommand}"
                         BackgroundColor="{StaticResource BrandSecondary}"
                         TextColor="White"
@@ -163,13 +163,13 @@
                                                              Margin="0,4,0,0">
                                             <Label Text="{Binding Protein, StringFormat='P: {0:F1}g'}" 
                                                    FontSize="13"
-                                                   TextColor="{StaticResource Gray600}" />
+                                                   TextColor="{StaticResource Gray400}" />
                                             <Label Text="{Binding Carbs, StringFormat='C: {0:F1}g'}" 
                                                    FontSize="13"
-                                                   TextColor="{StaticResource Gray600}" />
+                                                   TextColor="{StaticResource Gray400}" />
                                             <Label Text="{Binding Fat, StringFormat='F: {0:F1}g'}" 
                                                    FontSize="13"
-                                                   TextColor="{StaticResource Gray600}" />
+                                                   TextColor="{StaticResource Gray400}" />
                                         </HorizontalStackLayout>
 
                                     </Grid>
