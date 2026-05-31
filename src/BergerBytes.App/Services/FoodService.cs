@@ -8,11 +8,14 @@ namespace BergerBytes.App.Services
     {
         private readonly HttpClient _httpClient;
         private const string OpenFoodFactsBaseUrl = "https://world.openfoodfacts.org/api/v2/product";
+        private const string OpenFoodFactsSearchUrl = "https://world.openfoodfacts.org/cgi/search.pl";
+        private const string SearchFields = "code,product_name,product_name_en,brands,serving_size,serving_quantity,serving_quantity_unit,nutriments,image_front_url";
 
         public FoodService(HttpClient httpClient)
         {
             _httpClient = httpClient;
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("BergerBytes/1.0 (https://github.com/berger-bytes)");
         }
 
         public async Task<FoodProductDTO> GetProductByBarcodeAsync(string barcode, CancellationToken ct = default)
@@ -57,10 +60,38 @@ namespace BergerBytes.App.Services
             }
         }
 
-        private FoodProductDTO MapToDTO(OpenFoodFactsResponse response, string barcode)
+        public async Task<IList<FoodProductDTO>> SearchFoodAsync(string query, CancellationToken ct = default)
         {
-            var product = response.Product!;
+            try
+            {
+                var encodedQuery = Uri.EscapeDataString(query);
+                var url = $"{OpenFoodFactsSearchUrl}?search_terms={encodedQuery}&search_simple=1&action=process&json=1&page_size=20&fields={SearchFields}";
 
+                var response = await _httpClient.GetAsync(url, ct);
+                if (!response.IsSuccessStatusCode)
+                    return Array.Empty<FoodProductDTO>();
+
+                var searchResponse = await response.Content.ReadFromJsonAsync<OpenFoodFactsSearchResponse>(cancellationToken: ct);
+                if (searchResponse?.Products == null)
+                    return Array.Empty<FoodProductDTO>();
+
+                return searchResponse.Products
+                    .Where(p => !string.IsNullOrWhiteSpace(p.ProductName) || !string.IsNullOrWhiteSpace(p.ProductNameEn))
+                    .Select(p => MapProductToDTO(p, p.Code ?? string.Empty))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error searching food: {ex.Message}");
+                return Array.Empty<FoodProductDTO>();
+            }
+        }
+
+        private FoodProductDTO MapToDTO(OpenFoodFactsResponse response, string barcode)
+            => MapProductToDTO(response.Product!, barcode);
+
+        private FoodProductDTO MapProductToDTO(Product product, string barcode)
+        {
             // Get best product name available
             var productName = !string.IsNullOrWhiteSpace(product.ProductName)
                 ? product.ProductName

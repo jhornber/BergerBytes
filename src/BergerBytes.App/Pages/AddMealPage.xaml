@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:System="clr-namespace:System;assembly=netstandard"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="BergerBytes.App.Pages.AddMealPage"
              Title="Add Meal">
 
@@ -93,17 +94,18 @@
                                 Padding="12"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                                <Label Grid.Column="0" 
-                                       Text="|||" 
-                                       FontSize="20" 
-                                       VerticalOptions="Center" />
+                                <mi:MauiIcon Grid.Column="0"
+                                 Icon="{mi:Material Icon=QrCodeScanner}"
+                                 IconSize="22"
+                                 IconColor="{StaticResource BrandSecondary}"
+                                 VerticalOptions="Center" />            
                                 <Label Grid.Column="1"
                                        Text="{Binding ScannedBarcode, StringFormat='Barcode: {0}'}"
                                        FontSize="14"
                                        TextColor="{StaticResource Gray600}"
                                        VerticalOptions="Center" />
                                 <Button Grid.Column="2"
-                                        Text="?"
+                                        Text="X"
                                         Command="{Binding ClearBarcodeCommand}"
                                         BackgroundColor="Transparent"
                                         TextColor="{StaticResource Gray600}"
@@ -118,6 +120,17 @@
                                 Command="{Binding ScanBarcodeCommand}"
                                 BackgroundColor="{StaticResource BrandPrimary}"
                                 TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="44"
+                                IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
+
+                        <!-- Search Food Button -->
+                        <Button Text="🔍 Search Food"
+                                Command="{Binding SearchFoodCommand}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                                TextColor="{StaticResource BrandPrimary}"
+                                BorderColor="{StaticResource BrandPrimary}"
+                                BorderWidth="1"
                                 CornerRadius="8"
                                 HeightRequest="44"
                                 IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
@@ -214,7 +227,7 @@
                                         Padding="12"
                                         Margin="0,4"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
-                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
                                         <Label Grid.Row="0" Grid.Column="0"
                                                Text="{Binding Name}"
                                                FontSize="16"
@@ -225,8 +238,13 @@
                                                TextColor="{StaticResource BrandSecondary}"
                                                VerticalOptions="Center" />
                                         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Text="{Binding QuantityDisplay}"
                                                FontSize="12"
-                                               TextColor="{StaticResource Gray600}"
+                                               TextColor="{StaticResource BrandSecondary}"
+                                               Margin="0,2,0,0" />
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                               FontSize="12"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}"
                                                Margin="0,4,0,0">
                                             <Label.FormattedText>
                                                 <FormattedString>

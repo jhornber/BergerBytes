@@ -3,7 +3,7 @@ using BergerBytes.Shared.Models;
 
 namespace BergerBytes.App.Services
 {
-    public class DatabaseService : IMealLogRepository, ISettingsRepository
+    public class DatabaseService : IMealLogRepository, ISettingsRepository, IWeightLogRepository, IExerciseLogRepository, IRecentFoodRepository
     {
         private SQLiteAsyncConnection? _database;
         private readonly object _initLock = new();
@@ -29,6 +29,19 @@ namespace BergerBytes.App.Services
                 _database = new SQLiteAsyncConnection(databasePath);
                 await _database.CreateTableAsync<MealLog>();
                 await _database.CreateTableAsync<UserSettings>();
+                await _database.CreateTableAsync<WeightLog>();
+                await _database.CreateTableAsync<ExerciseLog>();
+                await _database.CreateTableAsync<RecentFoodItem>();
+
+                // Migrate existing tables: add Quantity/Unit columns if they don't exist yet
+                try { await _database.ExecuteAsync("ALTER TABLE MealLog ADD COLUMN Quantity REAL NOT NULL DEFAULT 1.0"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE MealLog ADD COLUMN Unit TEXT NOT NULL DEFAULT 'serving'"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE RecentFoodItem ADD COLUMN Quantity REAL NOT NULL DEFAULT 1.0"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE RecentFoodItem ADD COLUMN Unit TEXT NOT NULL DEFAULT 'serving'"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN HeightCm REAL NOT NULL DEFAULT 0"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN AgeYears INTEGER NOT NULL DEFAULT 0"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN Sex TEXT NOT NULL DEFAULT ''"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN ActivityLevel TEXT NOT NULL DEFAULT 'Sedentary'"); } catch { }
 
                 lock (_initLock)
                 {
@@ -97,6 +110,29 @@ namespace BergerBytes.App.Services
             return settings;
         }
 
+        // Weight Log Repository Implementation
+        public async Task<List<WeightLog>> GetWeightLogsAsync()
+        {
+            await InitAsync();
+            return await _database!.Table<WeightLog>()
+                .OrderByDescending(w => w.LoggedAt)
+                .ToListAsync();
+        }
+
+        public async Task<int> SaveWeightLogAsync(WeightLog entry)
+        {
+            await InitAsync();
+            if (entry.Id != 0)
+                return await _database!.UpdateAsync(entry);
+            return await _database!.InsertAsync(entry);
+        }
+
+        public async Task<int> DeleteWeightLogAsync(int id)
+        {
+            await InitAsync();
+            return await _database!.DeleteAsync<WeightLog>(id);
+        }
+
         public async Task<int> SaveSettingsAsync(UserSettings settings)
         {
             await InitAsync();
@@ -110,6 +146,96 @@ namespace BergerBytes.App.Services
             {
                 return await _database!.InsertAsync(settings);
             }
+        }
+
+        // Exercise Log Repository Implementation
+        public async Task<List<ExerciseLog>> GetExerciseLogsAsync()
+        {
+            await InitAsync();
+            return await _database!.Table<ExerciseLog>()
+                .OrderByDescending(e => e.LoggedAt)
+                .ToListAsync();
+        }
+
+        public async Task<int> SaveExerciseLogAsync(ExerciseLog entry)
+        {
+            await InitAsync();
+            if (entry.Id != 0)
+                return await _database!.UpdateAsync(entry);
+            return await _database!.InsertAsync(entry);
+        }
+
+        public async Task<int> DeleteExerciseLogAsync(int id)
+        {
+            await InitAsync();
+            return await _database!.DeleteAsync<ExerciseLog>(id);
+        }
+
+        // Recent Food Repository Implementation
+        public async Task<List<RecentFoodItem>> GetRecentFoodsAsync(int maxCount = 20)
+        {
+            await InitAsync();
+            return await _database!.Table<RecentFoodItem>()
+                .OrderByDescending(r => r.LastUsedAt)
+                .Take(maxCount)
+                .ToListAsync();
+        }
+
+        public async Task RecordFoodUsageAsync(string foodName, double calories, double protein, double carbs, double fat, string barcode = "", double quantity = 1.0, string unit = "serving")
+        {
+            if (string.IsNullOrWhiteSpace(foodName))
+                return;
+
+            await InitAsync();
+
+            var normalizedName = foodName.Trim();
+            var existing = await _database!.Table<RecentFoodItem>()
+                .Where(r => r.FoodName == normalizedName)
+                .FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                existing.Calories = calories;
+                existing.Protein = protein;
+                existing.Carbs = carbs;
+                existing.Fat = fat;
+                existing.Barcode = barcode;
+                existing.Quantity = quantity;
+                existing.Unit = unit;
+                existing.LastUsedAt = DateTime.Now;
+                await _database.UpdateAsync(existing);
+            }
+            else
+            {
+                await _database.InsertAsync(new RecentFoodItem
+                {
+                    FoodName = normalizedName,
+                    Calories = calories,
+                    Protein = protein,
+                    Carbs = carbs,
+                    Fat = fat,
+                    Barcode = barcode,
+                    Quantity = quantity,
+                    Unit = unit,
+                    LastUsedAt = DateTime.Now
+                });
+
+                // Trim to 20 most recent
+                var all = await _database.Table<RecentFoodItem>()
+                    .OrderByDescending(r => r.LastUsedAt)
+                    .ToListAsync();
+                if (all.Count > 20)
+                {
+                    foreach (var old in all.Skip(20))
+                        await _database.DeleteAsync(old);
+                }
+            }
+        }
+
+        public async Task ClearRecentFoodsAsync()
+        {
+            await InitAsync();
+            await _database!.DeleteAllAsync<RecentFoodItem>();
         }
     }
 }

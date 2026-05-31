@@ -7,6 +7,7 @@ namespace BergerBytes.App.Pages
     public partial class EditMealPage : ContentPage
     {
         private readonly EditMealPageViewModel _viewModel;
+        private bool _initialized = false;
 
         public MealGroup? MealGroup { get; set; }
 
@@ -21,10 +22,19 @@ namespace BergerBytes.App.Pages
         {
             base.OnAppearing();
 
-            if (MealGroup != null)
+            if (!_initialized && MealGroup != null)
             {
                 _viewModel.Initialize(MealGroup);
+                _initialized = true;
             }
+        }
+
+        protected override async void OnNavigatedTo(NavigatedToEventArgs args)
+        {
+            base.OnNavigatedTo(args);
+            await _viewModel.ProcessPendingFoodProductAsync();
+            await _viewModel.ProcessPendingBarcodeAsync();
+            await _viewModel.ProcessPendingFoodEntryAsync();
         }
     }
 }

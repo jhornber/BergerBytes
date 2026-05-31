@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             x:Class="BergerBytes.App.Pages.ExerciseLogPage"
+             Title="Log Exercise">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,32" Spacing="20">
+
+            <!-- Header -->
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" VerticalOptions="Center">
+                <mi:MauiIcon Icon="{mi:Material Icon=DirectionsRun}"
+                             IconSize="28"
+                             IconColor="{StaticResource BrandPrimary}" />
+                <Label Text="Log Exercise"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource BrandPrimary}"
+                       VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <!-- Activity -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Activity"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <Picker ItemsSource="{Binding Activities}"
+                            SelectedItem="{Binding SelectedActivity}"
+                            Title="Select an activity"
+                            FontSize="16"
+                            HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Description (optional) -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Description (optional)"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <Entry Text="{Binding Description}"
+                           Placeholder="e.g. Morning run in the park"
+                           FontSize="16"
+                           HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Date -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Date"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <DatePicker Date="{Binding LoggedDate}"
+                                Format="MMMM d, yyyy"
+                                FontSize="16"
+                                HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Start Time -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Start Time"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <TimePicker Time="{Binding LoggedTime}"
+                                Format="h:mm tt"
+                                FontSize="16"
+                                HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Duration -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Duration"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <HorizontalStackLayout Spacing="12">
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="12,4">
+                        <HorizontalStackLayout Spacing="6">
+                            <Entry Text="{Binding DurationHours}"
+                                   Keyboard="Numeric"
+                                   Placeholder="0"
+                                   FontSize="18"
+                                   WidthRequest="56"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="h"
+                                   FontSize="16"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                        </HorizontalStackLayout>
+                    </Border>
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="12,4">
+                        <HorizontalStackLayout Spacing="6">
+                            <Entry Text="{Binding DurationMinutes}"
+                                   Keyboard="Numeric"
+                                   Placeholder="30"
+                                   FontSize="18"
+                                   WidthRequest="56"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="min"
+                                   FontSize="16"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                        </HorizontalStackLayout>
+                    </Border>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Intensity -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Intensity"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <Picker ItemsSource="{Binding Intensities}"
+                            SelectedItem="{Binding SelectedIntensity}"
+                            FontSize="16"
+                            HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Calories Burned -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Calories Burned"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                <!-- Estimate banner (shown when activity + duration are filled) -->
+                <Border IsVisible="{Binding HasCaloriesPreview}"
+                        Stroke="{StaticResource BrandSecondaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                    <Label Text="{Binding CaloriesPreview}"
+                           FontSize="14"
+                           TextColor="{StaticResource BrandSecondary}" />
+                </Border>
+
+                <!-- Override entry -->
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <Entry Text="{Binding CaloriesOverrideText}"
+                           Keyboard="Numeric"
+                           Placeholder="Enter your tracker's value to override"
+                           FontSize="16"
+                           HorizontalOptions="Fill" />
+                </Border>
+
+                <Label Text="Leave blank to use the estimate above."
+                       FontSize="12"
+                       FontAttributes="Italic"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+            </VerticalStackLayout>
+
+            <!-- Save Button -->
+            <Button Text="Save Exercise"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    TextColor="{StaticResource White}"
+                    CornerRadius="12"
+                    HeightRequest="52"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    Margin="0,8,0,0" />
+
+            <!-- Cancel Button -->
+            <Button Text="Cancel"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource BrandPrimary}"
+                    BorderColor="{StaticResource BrandPrimaryBrush}"
+                    BorderWidth="1"
+                    CornerRadius="12"
+                    HeightRequest="52"
+                    FontSize="16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

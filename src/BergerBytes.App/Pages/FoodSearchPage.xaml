@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BergerBytes.App.ViewModels"
+             xmlns:dto="clr-namespace:BergerBytes.Shared.DTOs;assembly=BergerBytes.Shared"
+             xmlns:models="clr-namespace:BergerBytes.Shared.Models;assembly=BergerBytes.Shared"
+             x:Class="BergerBytes.App.Pages.FoodSearchPage"
+             x:DataType="viewmodels:FoodSearchPageViewModel"
+             Title="Search Food">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Search Bar -->
+        <Grid Grid.Row="0"
+              Padding="16,12"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="8">
+            <Entry Grid.Column="0"
+                   Text="{Binding SearchQuery}"
+                   Placeholder="Search food items..."
+                   ReturnCommand="{Binding SearchCommand}"
+                   ReturnType="Search"
+                   FontSize="16"
+                   ClearButtonVisibility="WhileEditing" />
+            <Grid Grid.Column="1"
+                  WidthRequest="80"
+                  HeightRequest="44">
+                <Button Text="Search"
+                        Command="{Binding SearchCommand}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="White"
+                        CornerRadius="8"
+                        IsVisible="{Binding IsSearching, Converter={StaticResource InvertedBoolConverter}}" />
+                <Border BackgroundColor="{StaticResource BrandPrimary}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 8"
+                        IsVisible="{Binding IsSearching}">
+                    <ActivityIndicator IsRunning="{Binding IsSearching}"
+                                       Color="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       WidthRequest="24"
+                                       HeightRequest="24" />
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Results Area -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout>
+
+                <!-- Recent Items Section -->
+                <VerticalStackLayout IsVisible="{Binding ShowRecentItems}"
+                                     Padding="16,8,16,0">
+                    <Label Text="Recently Used"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                           Margin="0,0,0,4" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:RecentFoodItem">
+                                <Border Margin="0,4"
+                                        Padding="12"
+                                        StrokeThickness="1"
+                                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding FoodName}"
+                                                   FontSize="15"
+                                                   FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation"
+                                                   MaxLines="1" />
+                                            <Label Text="{Binding ServingSummary}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource BrandSecondary}" />
+                                            <Label Text="{Binding MacrosSummary}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding CaloriesSummary}"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource BrandPrimary}"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FoodSearchPageViewModel}}, Path=SelectRecentCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator IsRunning="{Binding IsSearching}"
+                                   IsVisible="{Binding IsSearching}"
+                                   Color="{StaticResource BrandPrimary}"
+                                   HorizontalOptions="Center"
+                                   Margin="0,32" />
+
+                <!-- No Results Message -->
+                <Label Text="No results found. Try a different search term."
+                       IsVisible="{Binding HasNoResults}"
+                       HorizontalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                       FontSize="16"
+                       HorizontalTextAlignment="Center"
+                       Margin="32,32" />
+
+                <!-- Search Results List -->
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding SearchResults}"
+                                     IsVisible="{Binding IsSearching, Converter={StaticResource InvertedBoolConverter}}"
+                                     Padding="16,0,16,16">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="dto:FoodProductDTO">
+                            <Border Margin="0,4"
+                                    Padding="12"
+                                    StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                                <Grid ColumnDefinitions="56,*" ColumnSpacing="12">
+
+                                    <!-- Product Thumbnail -->
+                                    <Image Grid.Column="0"
+                                           Source="{Binding ImageUrl}"
+                                           WidthRequest="52"
+                                           HeightRequest="52"
+                                           Aspect="AspectFit"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Product Info -->
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding ProductName}"
+                                               FontSize="15"
+                                               FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="2" />
+                                        <Label Text="{Binding ServingSizeText}"
+                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="1" />
+                                        <Label Text="{Binding CaloriesPer100g, StringFormat='{0:F0} cal / 100g'}"
+                                               FontSize="13"
+                                               TextColor="{StaticResource BrandPrimary}" />
+                                    </VerticalStackLayout>
+
+                                </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FoodSearchPageViewModel}}, Path=SelectProductCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>
+

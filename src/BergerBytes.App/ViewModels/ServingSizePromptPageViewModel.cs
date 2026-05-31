@@ -208,7 +208,9 @@ namespace BergerBytes.App.ViewModels
                 { "Protein", PreviewProtein.ToString("F1") },
                 { "Carbs", PreviewCarbs.ToString("F1") },
                 { "Fat", PreviewFat.ToString("F1") },
-                { "Barcode", _foodProduct.Barcode }
+                { "Barcode", _foodProduct.Barcode },
+                { "Quantity", Quantity },
+                { "Unit", _units[SelectedUnitIndex] }
             });
         }
 

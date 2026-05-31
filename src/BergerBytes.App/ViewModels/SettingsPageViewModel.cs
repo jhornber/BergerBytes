@@ -7,12 +7,22 @@ namespace BergerBytes.App.ViewModels
     public class SettingsPageViewModel : BindableObject
     {
         private readonly ISettingsRepository _settingsRepository;
+        private readonly IWeightLogRepository _weightLogRepository;
         private UserSettings _settings;
         private string _dailyCalorieGoalText = string.Empty;
         private string _dailyProteinGoalText = string.Empty;
         private string _dailyCarbsGoalText = string.Empty;
         private string _dailyFatGoalText = string.Empty;
         private bool _darkModeEnabled;
+        private string _weightUnit = "kg";
+        private string _weightGoalText = string.Empty;
+        private string _weightGoalWeeksText = string.Empty;
+        private string _heightText = string.Empty;
+        private string _ageText = string.Empty;
+        private string _selectedSex = string.Empty;
+        private string _selectedActivityLevel = "Sedentary";
+        private string _selectedDietPreset = "Balanced (1.0g protein/kg)";
+        private double _currentWeightKg;
         private bool _isSaving;
 
         public string DailyCalorieGoalText
@@ -79,13 +89,184 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
-        public ICommand SaveSettingsCommand { get; }
+        public string WeightUnit
+        {
+            get => _weightUnit;
+            set
+            {
+                if (_weightUnit == value) return;
+                var oldUnit = _weightUnit;
+                _weightUnit = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HeightUnit));
 
-        public SettingsPageViewModel(ISettingsRepository settingsRepository)
+                // Convert displayed height when switching unit systems
+                if (double.TryParse(_heightText, out double currentH) && currentH > 0)
+                {
+                    double heightCm = oldUnit == "lbs" ? currentH * 2.54 : currentH;
+                    double newH = value == "lbs" ? heightCm / 2.54 : heightCm;
+                    _heightText = newH.ToString("F1");
+                    OnPropertyChanged(nameof(HeightText));
+                }
+
+                OnPropertyChanged(nameof(TdeeEstimateDisplay));
+                OnPropertyChanged(nameof(HasTdeeEstimate));
+                _settings.WeightUnit = value;
+                _ = _settingsRepository.SaveSettingsAsync(_settings);
+            }
+        }
+
+        public List<string> WeightUnits { get; } = new() { "kg", "lbs" };
+
+        public string HeightText
+        {
+            get => _heightText;
+            set
+            {
+                _heightText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TdeeEstimateDisplay));
+                OnPropertyChanged(nameof(HasTdeeEstimate));
+                OnPropertyChanged(nameof(CanCalculateGoals));
+            }
+        }
+
+        public string AgeText
+        {
+            get => _ageText;
+            set
+            {
+                _ageText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TdeeEstimateDisplay));
+                OnPropertyChanged(nameof(HasTdeeEstimate));
+                OnPropertyChanged(nameof(CanCalculateGoals));
+            }
+        }
+
+        public string SelectedSex
+        {
+            get => _selectedSex;
+            set
+            {
+                _selectedSex = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TdeeEstimateDisplay));
+                OnPropertyChanged(nameof(HasTdeeEstimate));
+                OnPropertyChanged(nameof(CanCalculateGoals));
+            }
+        }
+
+        public string SelectedActivityLevel
+        {
+            get => _selectedActivityLevel;
+            set
+            {
+                _selectedActivityLevel = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TdeeEstimateDisplay));
+                OnPropertyChanged(nameof(HasTdeeEstimate));
+            }
+        }
+
+        public List<string> SexOptions { get; } = new() { "Male", "Female" };
+        public List<string> ActivityLevels { get; } = new() { "Sedentary", "Lightly Active", "Moderately Active", "Very Active", "Extra Active" };
+
+        /// <summary>Display label for height entry (cm or in depending on weight unit).</summary>
+        public string HeightUnit => _weightUnit == "lbs" ? "in" : "cm";
+
+        /// <summary>Live TDEE estimate shown as a hint while the user fills in body metrics.</summary>
+        public string TdeeEstimateDisplay
+        {
+            get
+            {
+                if (!double.TryParse(_heightText, out double heightDisplay) || heightDisplay <= 0) return string.Empty;
+                if (!int.TryParse(_ageText, out int age) || age <= 0) return string.Empty;
+                if (string.IsNullOrEmpty(_selectedSex)) return string.Empty;
+                if (_currentWeightKg <= 0) return string.Empty;
+
+                double heightCm = _weightUnit == "lbs" ? heightDisplay * 2.54 : heightDisplay;
+                double bmr = (10 * _currentWeightKg) + (6.25 * heightCm) - (5 * age)
+                             + (_selectedSex == "Male" ? 5 : -161);
+
+                double multiplier = _selectedActivityLevel switch
+                {
+                    "Lightly Active"    => 1.375,
+                    "Moderately Active" => 1.55,
+                    "Very Active"       => 1.725,
+                    "Extra Active"      => 1.9,
+                    _                   => 1.2
+                };
+                double tdee = bmr * multiplier;
+                return $"Estimated TDEE: ~{tdee:F0} kcal/day";
+            }
+        }
+
+        public bool HasTdeeEstimate => !string.IsNullOrEmpty(TdeeEstimateDisplay);
+
+        public string SelectedDietPreset
+        {
+            get => _selectedDietPreset;
+            set { _selectedDietPreset = value; OnPropertyChanged(); }
+        }
+
+        public List<string> DietPresets { get; } = new()
+        {
+            "Balanced (1.0g protein/kg)",
+            "High Protein (1.8g protein/kg)",
+            "Endurance (0.7g protein/lb)",
+            "Low Carb (1.6g protein/kg)"
+        };
+
+        /// <summary>True when all body metrics required for TDEE computation are present in the current form.</summary>
+        public bool CanCalculateGoals
+        {
+            get
+            {
+                if (_currentWeightKg <= 0) return false;
+                if (!double.TryParse(_heightText, out double h) || h <= 0) return false;
+                if (!int.TryParse(_ageText, out int a) || a <= 0) return false;
+                return !string.IsNullOrEmpty(_selectedSex);
+            }
+        }
+
+        public string WeightGoalText
+        {
+            get => _weightGoalText;
+            set
+            {
+                _weightGoalText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WeightGoalHint));
+                OnPropertyChanged(nameof(HasWeightGoalHint));
+            }
+        }
+
+        public string WeightGoalWeeksText
+        {
+            get => _weightGoalWeeksText;
+            set
+            {
+                _weightGoalWeeksText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WeightGoalHint));
+                OnPropertyChanged(nameof(HasWeightGoalHint));
+            }
+        }
+
+        public string WeightGoalHint => ComputeWeightGoalHint();
+        public bool HasWeightGoalHint => !string.IsNullOrEmpty(WeightGoalHint);
+
+        public ICommand SaveSettingsCommand { get; }
+        public ICommand CalculateGoalsCommand { get; }
+
+        public SettingsPageViewModel(ISettingsRepository settingsRepository, IWeightLogRepository weightLogRepository)
         {
             _settingsRepository = settingsRepository;
+            _weightLogRepository = weightLogRepository;
             _settings = new UserSettings();
             SaveSettingsCommand = new Command(async () => await SaveSettingsAsync());
+            CalculateGoalsCommand = new Command(async () => await CalculateGoalsAsync());
         }
 
         public async Task InitializeAsync()
@@ -102,6 +283,51 @@ namespace BergerBytes.App.ViewModels
             OnPropertyChanged(nameof(DarkModeEnabled));
             if (Application.Current != null)
                 Application.Current.UserAppTheme = _darkModeEnabled ? AppTheme.Dark : AppTheme.Light;
+
+            _weightUnit = _settings.WeightUnit ?? "kg";
+            OnPropertyChanged(nameof(WeightUnit));
+
+            // Load current weight for goal validation
+            var weightLogs = await _weightLogRepository.GetWeightLogsAsync();
+            _currentWeightKg = weightLogs.OrderByDescending(w => w.LoggedAt).FirstOrDefault()?.WeightKg ?? 0;
+            OnPropertyChanged(nameof(CanCalculateGoals));
+
+            // Load weight goal (convert from kg to display unit)
+            if (_settings.WeightGoalKg > 0)
+            {
+                double displayGoal = _weightUnit == "lbs"
+                    ? _settings.WeightGoalKg / 0.45359237
+                    : _settings.WeightGoalKg;
+                _weightGoalText = displayGoal.ToString("F1");
+                OnPropertyChanged(nameof(WeightGoalText));
+            }
+            if (_settings.WeightGoalWeeks > 0)
+            {
+                _weightGoalWeeksText = _settings.WeightGoalWeeks.ToString();
+                OnPropertyChanged(nameof(WeightGoalWeeksText));
+            }
+            OnPropertyChanged(nameof(WeightGoalHint));
+            OnPropertyChanged(nameof(HasWeightGoalHint));
+
+            // Load body metrics
+            if (_settings.HeightCm > 0)
+            {
+                double displayHeight = _weightUnit == "lbs" ? _settings.HeightCm / 2.54 : _settings.HeightCm;
+                _heightText = displayHeight.ToString("F1");
+                OnPropertyChanged(nameof(HeightText));
+            }
+            if (_settings.AgeYears > 0)
+            {
+                _ageText = _settings.AgeYears.ToString();
+                OnPropertyChanged(nameof(AgeText));
+            }
+            _selectedSex = _settings.Sex ?? string.Empty;
+            OnPropertyChanged(nameof(SelectedSex));
+            _selectedActivityLevel = string.IsNullOrEmpty(_settings.ActivityLevel) ? "Sedentary" : _settings.ActivityLevel;
+            OnPropertyChanged(nameof(SelectedActivityLevel));
+            OnPropertyChanged(nameof(HeightUnit));
+            OnPropertyChanged(nameof(TdeeEstimateDisplay));
+            OnPropertyChanged(nameof(HasTdeeEstimate));
         }
 
         private async Task SaveSettingsAsync()
@@ -114,6 +340,41 @@ namespace BergerBytes.App.ViewModels
                 _settings.DailyProteinGoal = ParseGoalValue(DailyProteinGoalText);
                 _settings.DailyCarbsGoal = ParseGoalValue(DailyCarbsGoalText);
                 _settings.DailyFatGoal = ParseGoalValue(DailyFatGoalText);
+
+                // Weight goal: validate pace then save
+                double goalWeightDisplay = ParseGoalValue(WeightGoalText);
+                int goalWeeks = ParseWeeksValue(WeightGoalWeeksText);
+                double goalWeightKg = goalWeightDisplay > 0
+                    ? (_weightUnit == "lbs" ? goalWeightDisplay * 0.45359237 : goalWeightDisplay)
+                    : 0;
+
+                if (goalWeightKg > 0 && goalWeeks > 0 && _currentWeightKg > 0)
+                {
+                    double weeklyRateKg = Math.Abs(_currentWeightKg - goalWeightKg) / goalWeeks;
+                    if (weeklyRateKg > 2.27) // > 5 lbs/week
+                    {
+                        double weeklyRateLbs = weeklyRateKg / 0.45359237;
+                        double minWeeks = Math.Ceiling(Math.Abs(_currentWeightKg - goalWeightKg) / 2.27);
+                        await Application.Current!.MainPage!.DisplayAlertAsync(
+                            "Goal Too Aggressive",
+                            $"That requires ~{weeklyRateLbs:F1} lbs/week, which isn't safe. Try at least {minWeeks} weeks.",
+                            "OK");
+                        return;
+                    }
+                }
+
+                _settings.WeightGoalKg = goalWeightKg;
+                _settings.WeightGoalWeeks = goalWeeks;
+
+                // Body metrics
+                if (double.TryParse(_heightText, out double heightDisplay) && heightDisplay > 0)
+                    _settings.HeightCm = _weightUnit == "lbs" ? heightDisplay * 2.54 : heightDisplay;
+                else
+                    _settings.HeightCm = 0;
+
+                _settings.AgeYears = int.TryParse(_ageText, out int ageVal) && ageVal > 0 ? ageVal : 0;
+                _settings.Sex = _selectedSex ?? string.Empty;
+                _settings.ActivityLevel = string.IsNullOrEmpty(_selectedActivityLevel) ? "Sedentary" : _selectedActivityLevel;
 
                 await _settingsRepository.SaveSettingsAsync(_settings);
 
@@ -130,21 +391,145 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
-        private double ParseGoalValue(string text)
+        private async Task CalculateGoalsAsync()
         {
-            // If empty or whitespace, return 0
-            if (string.IsNullOrWhiteSpace(text))
-                return 0;
+            if (!CanCalculateGoals) return;
 
-            // Try to parse the value
-            if (double.TryParse(text, out double value))
+            // Re-compute TDEE from current form values (user may not have saved yet)
+            double.TryParse(_heightText, out double heightDisplay);
+            int.TryParse(_ageText, out int age);
+            double heightCm = _weightUnit == "lbs" ? heightDisplay * 2.54 : heightDisplay;
+
+            double bmr = (10 * _currentWeightKg) + (6.25 * heightCm) - (5 * age)
+                         + (_selectedSex == "Male" ? 5 : -161);
+
+            double multiplier = _selectedActivityLevel switch
             {
-                // If negative, return 0
-                return value < 0 ? 0 : value;
+                "Lightly Active"    => 1.375,
+                "Moderately Active" => 1.55,
+                "Very Active"       => 1.725,
+                "Extra Active"      => 1.9,
+                _                   => 1.2
+            };
+            double tdee = bmr * multiplier;
+
+            // Adjust for weight goal if set
+            double dailyCalories = tdee;
+            double goalWeightDisplay = ParseGoalValue(WeightGoalText);
+            int goalWeeks = ParseWeeksValue(WeightGoalWeeksText);
+            if (goalWeightDisplay > 0 && goalWeeks > 0)
+            {
+                double goalWeightKg = _weightUnit == "lbs" ? goalWeightDisplay * 0.45359237 : goalWeightDisplay;
+                double diffKg = _currentWeightKg - goalWeightKg;
+                double dailyDelta = diffKg * 7700.0 / (goalWeeks * 7.0); // + = deficit
+                dailyCalories = tdee - dailyDelta;
+                double floor = _selectedSex == "Male" ? 1500 : 1200;
+                dailyCalories = Math.Max(floor, dailyCalories);
+            }
+            dailyCalories = Math.Round(dailyCalories);
+
+            // Apply macro split — protein is always anchored to body weight since protein needs
+            // scale with lean mass, not calorie intake. Fat is a percentage of calories.
+            // Carbs fill the remainder.
+            int proteinG, carbsG, fatG;
+            if (_selectedDietPreset.StartsWith("Endurance"))
+            {
+                // Bodyweight method: ACSM midpoint for endurance athletes.
+                double weightLbs = _currentWeightKg / 0.45359237;
+                proteinG = (int)Math.Round(weightLbs * 0.7);   // ~1.54g/kg
+                fatG     = (int)Math.Round(weightLbs * 0.35);  // ~0.77g/kg
+                double remaining = dailyCalories - (proteinG * 4) - (fatG * 9);
+                carbsG   = (int)Math.Round(Math.Max(0, remaining) / 4);
+            }
+            else
+            {
+                var (proteinPerKg, fatPct) = GetPresetParams();
+                proteinG = (int)Math.Round(_currentWeightKg * proteinPerKg);
+                fatG     = (int)Math.Round((dailyCalories * fatPct) / 9);
+                double remaining = dailyCalories - (proteinG * 4) - (fatG * 9);
+                carbsG   = (int)Math.Round(Math.Max(0, remaining) / 4);
             }
 
-            // If parsing fails, return 0
+            // Enforce minimum protein floor: 1.0g/kg body weight (practical app minimum; RDA is 0.8g/kg).
+            // Only relevant for percentage-based presets at very low calorie targets.
+            // If protein falls short, carbs absorb the shortfall since they are the most flexible macro.
+            int minProteinG = (int)Math.Round(_currentWeightKg * 1.0);
+            if (proteinG < minProteinG)
+            {
+                int proteinBump = minProteinG - proteinG;
+                proteinG = minProteinG;
+                // Reduce carbs to keep total calories constant; clamp at zero
+                int carbsReduction = Math.Min(carbsG, (int)Math.Round(proteinBump * 4.0 / 4.0));
+                carbsG = Math.Max(0, carbsG - carbsReduction);
+            }
+
+            // Populate the goal fields
+            DailyCalorieGoalText = dailyCalories.ToString("F0");
+            DailyProteinGoalText = proteinG.ToString();
+            DailyCarbsGoalText   = carbsG.ToString();
+            DailyFatGoalText     = fatG.ToString();
+
+            await Application.Current!.MainPage!.DisplayAlertAsync(
+                "Goals Calculated",
+                $"{dailyCalories:F0} kcal  ·  {proteinG}g protein  ·  {carbsG}g carbs  ·  {fatG}g fat\n\nReview the values and tap Save Settings to keep them.",
+                "OK");
+        }
+
+        /// <summary>Returns the (protein g/kg, fat% of calories) for non-Endurance presets.
+        /// Protein is body-weight-anchored; fat scales with calories; carbs fill the remainder.</summary>
+        private (double proteinPerKg, double fatPct) GetPresetParams() => _selectedDietPreset switch
+        {
+            "High Protein (1.8g protein/kg)" => (1.8, 0.25),
+            "Low Carb (1.6g protein/kg)"     => (1.6, 0.45),
+            _                                => (1.0, 0.30), // Balanced — RDA-adjacent
+        };
+
+        private double ParseGoalValue(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return 0;
+            if (double.TryParse(text, out double value))
+                return value < 0 ? 0 : value;
             return 0;
+        }
+
+        private int ParseWeeksValue(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return 0;
+            if (int.TryParse(text, out int value))
+                return value < 1 ? 0 : value;
+            return 0;
+        }
+
+        private string ComputeWeightGoalHint()
+        {
+            if (!double.TryParse(WeightGoalText, out double goalDisplay) || goalDisplay <= 0)
+                return string.Empty;
+            if (!int.TryParse(WeightGoalWeeksText, out int weeks) || weeks < 1)
+                return string.Empty;
+            if (_currentWeightKg <= 0)
+                return string.Empty;
+
+            double goalKg = _weightUnit == "lbs" ? goalDisplay * 0.45359237 : goalDisplay;
+            double diffKg = _currentWeightKg - goalKg;
+
+            if (Math.Abs(diffKg) < 0.1)
+                return "Your current weight already matches this goal.";
+
+            double weeklyRateKg = Math.Abs(diffKg) / weeks;
+            double weeklyRateDisplay = _weightUnit == "lbs" ? weeklyRateKg / 0.45359237 : weeklyRateKg;
+            string direction = diffKg > 0 ? "lose" : "gain";
+
+            if (weeklyRateKg <= 0.45)   // ≤ 1 lb/week
+                return $"Gentle pace — {weeklyRateDisplay:F1} {_weightUnit}/week. Very sustainable.";
+            if (weeklyRateKg <= 0.91)   // ≤ 2 lbs/week
+                return $"Healthy pace — {weeklyRateDisplay:F1} {_weightUnit}/week. Great goal!";
+            if (weeklyRateKg <= 2.27)   // ≤ 5 lbs/week
+                return $"Aggressive — {weeklyRateDisplay:F1} {_weightUnit}/week. Requires real discipline.";
+
+            double minWeeks = Math.Ceiling(Math.Abs(diffKg) / 2.27);
+            return $"\u26a0 Too fast — {weeklyRateDisplay:F1} {_weightUnit}/week. Try at least {minWeeks} weeks.";  
         }
     }
 }

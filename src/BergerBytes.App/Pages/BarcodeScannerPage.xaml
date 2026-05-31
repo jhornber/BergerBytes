@@ -10,6 +10,7 @@
         <!-- Camera View -->
         <scanner:CameraView 
             x:Name="cameraView"
+            CameraEnabled="{Binding CameraEnabled}"
             OnDetectionFinished="OnBarcodesDetected" />
 
         <!-- Overlay with instructions and cancel button -->
@@ -61,7 +62,7 @@
                 BackgroundColor="#CC000000">
                 <Button 
                     Text="✕ Cancel"
-                    Clicked="OnCancelClicked"
+                    Command="{Binding CancelCommand}"
                     BackgroundColor="{StaticResource BrandPrimary}"
                     TextColor="White"
                     FontSize="18"

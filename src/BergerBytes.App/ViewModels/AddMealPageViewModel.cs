@@ -12,21 +12,32 @@ namespace BergerBytes.App.ViewModels
     [QueryProperty(nameof(Protein), "Protein")]
     [QueryProperty(nameof(Carbs), "Carbs")]
     [QueryProperty(nameof(Fat), "Fat")]
+    [QueryProperty(nameof(Quantity), "Quantity")]
+    [QueryProperty(nameof(Unit), "Unit")]
     [QueryProperty(nameof(BarcodeFromServing), "Barcode")]
+    [QueryProperty(nameof(SelectedFoodProduct), "SelectedFoodProduct")]
     public class AddMealPageViewModel : BindableObject
     {
         private readonly IMealLogRepository _repository;
         private readonly IFoodService _foodService;
+        private readonly IRecentFoodRepository _recentFoodRepository;
         private int _selectedMealTypeIndex = 3; // Default to "Other"
         private string _currentFoodName = string.Empty;
         private string _currentCalories = string.Empty;
         private string _currentProtein = string.Empty;
         private string _currentCarbs = string.Empty;
         private string _currentFat = string.Empty;
+        private string _currentQuantity = "1";
+        private string _currentUnit = "serving";
         private DateTime _mealDate = DateTime.Today;
         private TimeSpan _mealTime = DateTime.Now.TimeOfDay;
         private string _scannedBarcodeValue = string.Empty;
+        private string _pendingBarcode = string.Empty;
+        private string _lastProcessedBarcode = string.Empty;
         private bool _isLoadingProduct = false;
+        private FoodProductDTO? _lastSelectedFoodProduct;
+        private FoodProductDTO? _pendingFoodProduct;
+        private bool _hasPendingFoodEntry = false;
 
         public ObservableCollection<FoodEntry> FoodEntries { get; } = new();
 
@@ -114,6 +125,26 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
+        public string CurrentQuantity
+        {
+            get => _currentQuantity;
+            set
+            {
+                _currentQuantity = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CurrentUnit
+        {
+            get => _currentUnit;
+            set
+            {
+                _currentUnit = value;
+                OnPropertyChanged();
+            }
+        }
+
         public string ScannedBarcode
         {
             get => _scannedBarcodeValue;
@@ -128,10 +159,8 @@ namespace BergerBytes.App.ViewModels
                 _scannedBarcodeValue = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(HasScannedBarcode));
-                if (!string.IsNullOrEmpty(value))
-                {
-                    _ = HandleScannedBarcodeAsync(value);
-                }
+                if (!string.IsNullOrEmpty(value) && value != _lastProcessedBarcode)
+                    _pendingBarcode = value;
             }
         }
 
@@ -150,7 +179,12 @@ namespace BergerBytes.App.ViewModels
         // Query properties from ServingSizePromptPage
         public string FoodName
         {
-            set => CurrentFoodName = value;
+            set
+            {
+                CurrentFoodName = value;
+                if (!string.IsNullOrEmpty(value))
+                    _hasPendingFoodEntry = true;
+            }
         }
 
         public string Calories
@@ -173,9 +207,51 @@ namespace BergerBytes.App.ViewModels
             set => CurrentFat = value;
         }
 
+        public string Quantity
+        {
+            set => CurrentQuantity = value;
+        }
+
+        public string Unit
+        {
+            set => CurrentUnit = value;
+        }
+
         public string BarcodeFromServing
         {
             set => _scannedBarcodeValue = value;
+        }
+
+        public FoodProductDTO? SelectedFoodProduct
+        {
+            set
+            {
+                if (value == null || ReferenceEquals(_lastSelectedFoodProduct, value)) return;
+                _lastSelectedFoodProduct = value;
+                _pendingFoodProduct = value;
+            }
+        }
+
+        public void ProcessPendingFoodEntry()
+        {
+            if (!_hasPendingFoodEntry) return;
+            _hasPendingFoodEntry = false;
+            AddFoodItem();
+        }
+
+        public async Task ProcessPendingFoodProductAsync()
+        {
+            if (_pendingFoodProduct == null) return;
+            // Discard any pending food entry from a previous navigation — the re-applied
+            // FoodName query property from that trip is stale; the new entry will arrive
+            // from ServingSizePromptPage once the user confirms the new product's serving.
+            _hasPendingFoodEntry = false;
+            var product = _pendingFoodProduct;
+            _pendingFoodProduct = null;
+            await Shell.Current.GoToAsync("ServingSizePromptPage", new Dictionary<string, object>
+            {
+                { "FoodProduct", product }
+            });
         }
 
         public bool HasFoodEntries => FoodEntries.Count > 0;
@@ -190,17 +266,20 @@ namespace BergerBytes.App.ViewModels
         public ICommand SaveMealCommand { get; }
         public ICommand CancelCommand { get; }
         public ICommand ScanBarcodeCommand { get; }
+        public ICommand SearchFoodCommand { get; }
         public ICommand ClearBarcodeCommand { get; }
 
-        public AddMealPageViewModel(IMealLogRepository repository, IFoodService foodService)
+        public AddMealPageViewModel(IMealLogRepository repository, IFoodService foodService, IRecentFoodRepository recentFoodRepository)
         {
             _repository = repository;
             _foodService = foodService;
+            _recentFoodRepository = recentFoodRepository;
             AddFoodItemCommand = new Command(AddFoodItem);
             RemoveFoodItemCommand = new Command<FoodEntry>(RemoveFoodItem);
             SaveMealCommand = new Command(async () => await SaveMealAsync());
             CancelCommand = new Command(async () => await CancelAsync());
             ScanBarcodeCommand = new Command(async () => await ScanBarcodeAsync());
+            SearchFoodCommand = new Command(async () => await SearchFoodAsync());
             ClearBarcodeCommand = new Command(ClearBarcode);
 
             FoodEntries.CollectionChanged += (s, e) =>
@@ -218,11 +297,29 @@ namespace BergerBytes.App.ViewModels
             await Shell.Current.GoToAsync("BarcodeScannerPage");
         }
 
+        private async Task SearchFoodAsync()
+        {
+            await Shell.Current.GoToAsync("FoodSearchPage");
+        }
+
+        
+
+        public async Task ProcessPendingBarcodeAsync()
+        {
+            if (string.IsNullOrEmpty(_pendingBarcode)) return;
+            // Same as above: discard stale FoodName re-application before processing the new barcode.
+            _hasPendingFoodEntry = false;
+            var barcode = _pendingBarcode;
+            _pendingBarcode = string.Empty;
+            await HandleScannedBarcodeAsync(barcode);
+        }
+
         private async Task HandleScannedBarcodeAsync(string barcode)
         {
             if (string.IsNullOrWhiteSpace(barcode))
                 return;
 
+            _lastProcessedBarcode = barcode;
             IsLoadingProduct = true;
 
             try
@@ -285,7 +382,9 @@ namespace BergerBytes.App.ViewModels
                 CaloriesText = CurrentCalories.Trim(),
                 ProteinText = string.IsNullOrWhiteSpace(CurrentProtein) ? "0" : CurrentProtein.Trim(),
                 CarbsText = string.IsNullOrWhiteSpace(CurrentCarbs) ? "0" : CurrentCarbs.Trim(),
-                FatText = string.IsNullOrWhiteSpace(CurrentFat) ? "0" : CurrentFat.Trim()
+                FatText = string.IsNullOrWhiteSpace(CurrentFat) ? "0" : CurrentFat.Trim(),
+                QuantityText = string.IsNullOrWhiteSpace(CurrentQuantity) ? "1" : CurrentQuantity.Trim(),
+                Unit = string.IsNullOrWhiteSpace(CurrentUnit) ? "serving" : CurrentUnit.Trim()
             };
 
             if (!foodEntry.IsValid)
@@ -296,12 +395,25 @@ namespace BergerBytes.App.ViewModels
 
             FoodEntries.Add(foodEntry);
 
+            // Save to recent foods (fire and forget)
+            _ = _recentFoodRepository.RecordFoodUsageAsync(
+                foodEntry.Name,
+                foodEntry.GetCalories(),
+                foodEntry.GetProtein(),
+                foodEntry.GetCarbs(),
+                foodEntry.GetFat(),
+                _scannedBarcodeValue,
+                foodEntry.GetQuantity(),
+                foodEntry.Unit);
+
             // Clear form for next item
             CurrentFoodName = string.Empty;
             CurrentCalories = string.Empty;
             CurrentProtein = string.Empty;
             CurrentCarbs = string.Empty;
             CurrentFat = string.Empty;
+            CurrentQuantity = "1";
+            CurrentUnit = "serving";
         }
 
         private void RemoveFoodItem(FoodEntry? item)
@@ -334,6 +446,8 @@ namespace BergerBytes.App.ViewModels
                         Protein = entry.GetProtein(),
                         Carbs = entry.GetCarbs(),
                         Fat = entry.GetFat(),
+                        Quantity = entry.GetQuantity(),
+                        Unit = entry.Unit,
                         MealType = mealType,
                         Timestamp = timestamp
                     };

@@ -7,10 +7,10 @@ namespace BergerBytes.App.Pages
     {
         private readonly DashboardPageViewModel _viewModel;
 
-        public DashboardPage(IMealLogRepository repository, ISettingsRepository settingsRepository)
+        public DashboardPage(IMealLogRepository repository, ISettingsRepository settingsRepository, IWeightLogRepository weightLogRepository, IExerciseLogRepository exerciseLogRepository)
         {
             InitializeComponent();
-            _viewModel = new DashboardPageViewModel(repository, settingsRepository);
+            _viewModel = new DashboardPageViewModel(repository, settingsRepository, weightLogRepository, exerciseLogRepository);
             BindingContext = _viewModel;
         }
 

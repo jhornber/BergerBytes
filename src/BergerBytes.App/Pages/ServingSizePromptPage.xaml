@@ -37,7 +37,7 @@
                         x:Name="BarcodeLabel"
                         Text="{Binding Barcode, StringFormat='Barcode: {0}'}"
                         FontSize="14"
-                        TextColor="{StaticResource Gray600}"
+                        TextColor="{StaticResource Gray400}"
                         HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Border>
@@ -92,7 +92,7 @@
                         <Label 
                             Text="{Binding ServingSizeHintText}"
                             FontSize="14"
-                            TextColor="{StaticResource Gray600}"
+                            TextColor="{AppThemeBinding Dark={StaticResource Gray300}, Light={StaticResource Gray600}}"
                             VerticalOptions="Center"
                             LineBreakMode="WordWrap" />
                     </HorizontalStackLayout>

@@ -7,10 +7,10 @@ namespace BergerBytes.App.Pages
     {
         private readonly LogPageViewModel _viewModel;
 
-        public LogPage(IMealLogRepository repository)
+        public LogPage(IMealLogRepository repository, IExerciseLogRepository exerciseRepository)
         {
             InitializeComponent();
-            _viewModel = new LogPageViewModel(repository);
+            _viewModel = new LogPageViewModel(repository, exerciseRepository);
             BindingContext = _viewModel;
         }
 

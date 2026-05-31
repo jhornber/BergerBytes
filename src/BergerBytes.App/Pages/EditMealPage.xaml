@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:System="clr-namespace:System;assembly=netstandard"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="BergerBytes.App.Pages.EditMealPage"
              Title="Edit Meal">
 
@@ -9,10 +10,16 @@
         <VerticalStackLayout Padding="16" Spacing="20">
 
             <!-- Header -->
-            <Label Text="✏️ Edit Meal" 
-                   FontSize="28" 
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource BrandPrimary}" />
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" VerticalOptions="Center">
+                <mi:MauiIcon Icon="{mi:Material Icon=Edit}"
+                             IconSize="28"
+                             IconColor="{StaticResource BrandPrimary}" />
+                <Label Text="Edit Meal"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource BrandPrimary}"
+                       VerticalOptions="Center" />
+            </HorizontalStackLayout>
 
             <!-- Meal Type Selection -->
             <VerticalStackLayout Spacing="8">
@@ -78,14 +85,15 @@
                         Margin="0,8,0,0"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                        <Label Grid.Column="0" 
-                               Text="???" 
-                               FontSize="20" 
-                               VerticalOptions="Center" />
+                        <mi:MauiIcon Grid.Column="0"
+                                     Icon="{mi:Material Icon=QrCodeScanner}"
+                                     IconSize="22"
+                                     IconColor="{StaticResource BrandSecondary}"
+                                     VerticalOptions="Center" />
                         <Label Grid.Column="1"
                                Text="{Binding ScannedBarcode, StringFormat='Barcode: {0}'}"
                                FontSize="14"
-                               TextColor="{StaticResource Gray600}"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}"
                                VerticalOptions="Center" />
                         <Button Grid.Column="2"
                                 Text="?"
@@ -98,15 +106,27 @@
                     </Grid>
                 </Border>
 
-                <!-- Scan Barcode Button -->
-                <Button Text="Scan Barcode to Add Item"
-                        Command="{Binding ScanBarcodeCommand}"
-                        BackgroundColor="{StaticResource BrandSecondary}"
-                        TextColor="White"
-                        CornerRadius="8"
-                        HeightRequest="44"
-                        Margin="0,8,0,8"
-                        IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
+                <!-- Scan / Search Buttons -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,8,0,0">
+                    <Button Grid.Column="0"
+                            Text="Scan Barcode"
+                            Command="{Binding ScanBarcodeCommand}"
+                            BackgroundColor="{StaticResource BrandSecondary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="44"
+                            IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Button Grid.Column="1"
+                            Text="🔍 Search Food"
+                            Command="{Binding SearchFoodCommand}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                            TextColor="{StaticResource BrandPrimary}"
+                            BorderColor="{StaticResource BrandPrimary}"
+                            BorderWidth="1"
+                            CornerRadius="8"
+                            HeightRequest="44"
+                            IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
+                </Grid>
 
                 <!-- Loading Indicator -->
                 <ActivityIndicator IsRunning="{Binding IsLoadingProduct}"
@@ -141,7 +161,7 @@
                                         StrokeThickness="1"
                                         StrokeShape="RoundRectangle 8"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
 
                                         <!-- Food Name -->
                                         <Label Grid.Row="0" Grid.Column="0"
@@ -157,8 +177,15 @@
                                                TextColor="{StaticResource BrandPrimary}"
                                                VerticalOptions="Center" />
 
+                                        <!-- Quantity -->
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Text="{Binding QuantityDisplay}"
+                                               FontSize="12"
+                                               TextColor="{StaticResource BrandSecondary}"
+                                               Margin="0,2,0,0" />
+
                                         <!-- Macros -->
-                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                        <HorizontalStackLayout Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
                                                              Spacing="12" 
                                                              Margin="0,4,0,0">
                                             <Label Text="{Binding Protein, StringFormat='P: {0:F1}g'}" 

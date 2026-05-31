@@ -3,14 +3,14 @@ using BergerBytes.App.ViewModels;
 
 namespace BergerBytes.App.Pages
 {
-    public partial class SettingsPage : ContentPage
+    public partial class WeightLogPage : ContentPage
     {
-        private readonly SettingsPageViewModel _viewModel;
+        private readonly WeightLogPageViewModel _viewModel;
 
-        public SettingsPage(ISettingsRepository settingsRepository, IWeightLogRepository weightLogRepository)
+        public WeightLogPage(IWeightLogRepository repository, ISettingsRepository settingsRepository)
         {
             InitializeComponent();
-            _viewModel = new SettingsPageViewModel(settingsRepository, weightLogRepository);
+            _viewModel = new WeightLogPageViewModel(repository, settingsRepository);
             BindingContext = _viewModel;
         }
 

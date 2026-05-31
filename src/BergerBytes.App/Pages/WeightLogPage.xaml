@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             x:Class="BergerBytes.App.Pages.WeightLogPage"
+             Title="Log Weight">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,32" Spacing="20">
+
+            <!-- Header -->
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" VerticalOptions="Center">
+                <mi:MauiIcon Icon="{mi:Material Icon=FitnessCenter}"
+                             IconSize="28"
+                             IconColor="{StaticResource BrandPrimary}" />
+                <Label Text="Log Weight"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource BrandPrimary}"
+                       VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <!-- Date -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Date"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <DatePicker Date="{Binding LoggedDate}"
+                                Format="MMMM d, yyyy"
+                                FontSize="16"
+                                HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Time -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Time"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <TimePicker Time="{Binding LoggedTime}"
+                                Format="h:mm tt"
+                                FontSize="16"
+                                HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Weight -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Weight"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <Entry Text="{Binding WeightText}"
+                           Keyboard="Numeric"
+                           Placeholder="e.g. 75.5"
+                           FontSize="18"
+                           HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Unit Selector -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Unit"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,4">
+                    <Picker ItemsSource="{Binding Units}"
+                            SelectedItem="{Binding SelectedUnit}"
+                            FontSize="16"
+                            HorizontalOptions="Fill" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Save Button -->
+            <Button Text="Save Weight"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    TextColor="{StaticResource White}"
+                    CornerRadius="12"
+                    HeightRequest="52"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    Margin="0,8,0,0" />
+
+            <!-- Cancel Button -->
+            <Button Text="Cancel"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource BrandPrimary}"
+                    BorderColor="{StaticResource BrandPrimary}"
+                    BorderWidth="1"
+                    CornerRadius="12"
+                    HeightRequest="52"
+                    FontSize="16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

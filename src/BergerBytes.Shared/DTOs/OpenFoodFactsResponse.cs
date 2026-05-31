@@ -20,6 +20,9 @@ namespace BergerBytes.Shared.DTOs
 
     public class Product
     {
+        [JsonPropertyName("code")]
+        public string? Code { get; set; }
+
         [JsonPropertyName("product_name")]
         public string? ProductName { get; set; }
 
