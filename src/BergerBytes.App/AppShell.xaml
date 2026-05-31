@@ -4,11 +4,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:BergerBytes.App.Pages"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     Title="BergerBytes"
     Shell.TabBarBackgroundColor="{StaticResource BrandPrimary}"
     Shell.TabBarForegroundColor="{StaticResource BrandSecondary}"
     Shell.TabBarTitleColor="{StaticResource BrandSecondary}"
-    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray400}}"
+    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray100}}"
     Shell.NavBarHasShadow="True"
     Shell.BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource BrandSurface}}"
     Shell.ForegroundColor="{StaticResource BrandPrimary}"
@@ -16,19 +17,19 @@
 
 
     <TabBar>
-        <Tab Title="📝 Log">
+        <Tab Title="Log" mi:MauiIcon.Value="{mi:Material Icon=FormatListBulleted, TargetName='.'}">
             <ShellContent
                 ContentTemplate="{DataTemplate pages:LogPage}"
                 Route="LogPage" />
         </Tab>
 
-        <Tab Title="📊 Dashboard">
+        <Tab Title="Dashboard" mi:MauiIcon.Value="{mi:Material Icon=Dashboard, TargetName='.'}">
             <ShellContent
                 ContentTemplate="{DataTemplate pages:DashboardPage}"
                 Route="DashboardPage" />
         </Tab>
 
-        <Tab Title="⚙️ Settings">
+        <Tab Title="Settings" mi:MauiIcon.Value="{mi:Material Icon=Settings, TargetName='.'}">
             <ShellContent
                 ContentTemplate="{DataTemplate pages:SettingsPage}"
                 Route="SettingsPage" />

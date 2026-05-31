@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="BergerBytes.App.Pages.SettingsPage">
 
     <ScrollView>
@@ -8,12 +9,17 @@
             Padding="24,32"
             Spacing="20">
 
-            <Label
-                Text="⚙️ Settings"
-                FontSize="28"
-                FontAttributes="Bold"
-                TextColor="{StaticResource BrandPrimary}"
-                HorizontalOptions="Start" />
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" VerticalOptions="Center">
+                <mi:MauiIcon Icon="{mi:Material Icon=Settings}"
+                             IconSize="28"
+                             IconColor="{StaticResource BrandPrimary}" />
+                <Label
+                    Text="Settings"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource BrandPrimary}"
+                    VerticalOptions="Center" />
+            </HorizontalStackLayout>
 
             <Label
                 Text="Customize your daily nutrition goals."
@@ -99,16 +105,229 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Save Button -->
-            <Button
-                Text="Save Settings"
-                Command="{Binding SaveSettingsCommand}"
-                BackgroundColor="{StaticResource BrandPrimary}"
-                TextColor="{StaticResource White}"
-                CornerRadius="12"
-                HeightRequest="52"
-                FontAttributes="Bold"
-                FontSize="16" />
+            <!-- Body Metrics Section -->
+            <Label Text="Body Metrics"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource BrandPrimary}"
+                   Margin="0,8,0,0" />
+
+            <Label Text="Used to calculate your personalized daily calorie recommendation."
+                   FontSize="14"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+            <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16">
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Age -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Age"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        <HorizontalStackLayout Spacing="12">
+                            <Entry Text="{Binding AgeText}"
+                                   Keyboard="Numeric"
+                                   Placeholder="e.g. 30"
+                                   WidthRequest="120"
+                                   HorizontalOptions="Start" />
+                            <Label Text="years" FontSize="16" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <!-- Sex -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="Sex" FontSize="16" />
+                            <Label Text="Used for calorie calculation"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                Stroke="{StaticResource BrandPrimaryBrush}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="8,2"
+                                VerticalOptions="Center">
+                            <Picker ItemsSource="{Binding SexOptions}"
+                                    SelectedItem="{Binding SelectedSex}"
+                                    Title="Select"
+                                    FontSize="15"
+                                    WidthRequest="110" />
+                        </Border>
+                    </Grid>
+
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <!-- Height -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding HeightUnit, StringFormat='Height ({0})'}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        <HorizontalStackLayout Spacing="12">
+                            <Entry Text="{Binding HeightText}"
+                                   Keyboard="Numeric"
+                                   Placeholder="e.g. 178"
+                                   WidthRequest="120"
+                                   HorizontalOptions="Start" />
+                            <Label Text="{Binding HeightUnit}" FontSize="16" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <!-- Activity Level -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="Activity Level" FontSize="16" />
+                            <Label Text="How active are you on a typical day?"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                Stroke="{StaticResource BrandPrimaryBrush}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="8,2"
+                                VerticalOptions="Center">
+                            <Picker ItemsSource="{Binding ActivityLevels}"
+                                    SelectedItem="{Binding SelectedActivityLevel}"
+                                    FontSize="15"
+                                    WidthRequest="170" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Live TDEE estimate -->
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                             IsVisible="{Binding HasTdeeEstimate}" />
+                    <Label Text="{Binding TdeeEstimateDisplay}"
+                           FontSize="14"
+                           FontAttributes="Italic"
+                           TextColor="{StaticResource BrandSecondary}"
+                           HorizontalOptions="Center"
+                           IsVisible="{Binding HasTdeeEstimate}" />
+
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <!-- Macro Split Preset -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="Macro Split" FontSize="16" />
+                            <Label Text="Preset used when calculating goals"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                Stroke="{StaticResource BrandPrimaryBrush}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="8,2"
+                                VerticalOptions="Center">
+                            <Picker ItemsSource="{Binding DietPresets}"
+                                    SelectedItem="{Binding SelectedDietPreset}"
+                                    FontSize="15"
+                                    WidthRequest="190" />
+                        </Border>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Weight Goal Section -->
+            <Label Text="Weight Goal"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource BrandPrimary}"
+                   Margin="0,8,0,0" />
+
+            <Label Text="How much do you want to weigh, and by when?"
+                   FontSize="14"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+            <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16">
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Target Weight -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding WeightUnit, StringFormat='Target Weight ({0})'}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        <HorizontalStackLayout Spacing="12">
+                            <Entry Text="{Binding WeightGoalText}"
+                                   Keyboard="Numeric"
+                                   Placeholder="e.g. 75"
+                                   WidthRequest="120"
+                                   HorizontalOptions="Start" />
+                            <Label Text="{Binding WeightUnit}"
+                                   FontSize="16"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <!-- Timeframe -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Timeframe"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        <HorizontalStackLayout Spacing="12">
+                            <Entry Text="{Binding WeightGoalWeeksText}"
+                                   Keyboard="Numeric"
+                                   Placeholder="e.g. 8"
+                                   WidthRequest="120"
+                                   HorizontalOptions="Start" />
+                            <Label Text="weeks"
+                                   FontSize="16"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Pace hint -->
+                    <Label Text="{Binding WeightGoalHint}"
+                           FontSize="13"
+                           FontAttributes="Italic"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                           IsVisible="{Binding HasWeightGoalHint}" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        Text="Calculate Goals"
+                        Command="{Binding CalculateGoalsCommand}"
+                        IsEnabled="{Binding CanCalculateGoals}"
+                        BackgroundColor="{StaticResource BrandSecondary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="52"
+                        FontAttributes="Bold"
+                        FontSize="15" />
+                <Button Grid.Column="1"
+                        Text="Save Settings"
+                        Command="{Binding SaveSettingsCommand}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="52"
+                        FontAttributes="Bold"
+                        FontSize="15" />
+            </Grid>
 
             <!-- App Preferences Section -->
             <Label Text="Appearance" FontSize="20" FontAttributes="Bold" 
@@ -119,13 +338,42 @@
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 12"
                 Padding="16">
-                <HorizontalStackLayout Spacing="12">
-                    <Label Text="Dark Mode" FontSize="16" VerticalOptions="Center"
-                           HorizontalOptions="Fill" HorizontalTextAlignment="Start" />
-                    <Switch IsToggled="{Binding DarkModeEnabled}" 
-                            OnColor="{StaticResource BrandPrimary}"
-                            HorizontalOptions="End" />
-                </HorizontalStackLayout>
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="0">
+                    <!-- Dark Mode Row -->
+                    <HorizontalStackLayout Grid.Row="0" Spacing="12">
+                        <Label Text="Dark Mode" FontSize="16" VerticalOptions="Center"
+                               HorizontalOptions="Fill" HorizontalTextAlignment="Start" />
+                        <Switch IsToggled="{Binding DarkModeEnabled}" 
+                                OnColor="{StaticResource BrandPrimary}"
+                                HorizontalOptions="End" />
+                    </HorizontalStackLayout>
+
+                    <BoxView Grid.Row="1"
+                             HeightRequest="1"
+                             Margin="0,12"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <!-- Weight Unit Row -->
+                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="Weight Unit" FontSize="16" />
+                            <Label Text="Default unit for logging weight"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                Stroke="{StaticResource BrandPrimaryBrush}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="8,2"
+                                VerticalOptions="Center">
+                            <Picker ItemsSource="{Binding WeightUnits}"
+                                    SelectedItem="{Binding WeightUnit}"
+                                    FontSize="15"
+                                    WidthRequest="80" />
+                        </Border>
+                    </Grid>
+                </Grid>
             </Border>
 
             <!-- Account Section (Placeholder) -->

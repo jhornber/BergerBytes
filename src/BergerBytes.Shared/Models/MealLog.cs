@@ -21,6 +21,10 @@ namespace BergerBytes.Shared.Models
 
         public DateTime Timestamp { get; set; }
 
+        public double Quantity { get; set; } = 1.0;
+
+        public string Unit { get; set; } = "serving";
+
         // Display helper for meal type badge
         public string MealTypeDisplay => MealType switch
         {
@@ -30,5 +34,7 @@ namespace BergerBytes.Shared.Models
             MealType.Other => "🍽️ Other",
             _ => "🍽️ Other"
         };
+
+        public string QuantityDisplay => $"{Quantity:G} {Unit}";
     }
 }

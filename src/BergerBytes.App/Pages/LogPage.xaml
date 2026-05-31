@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="BergerBytes.App.Pages.LogPage">
 
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
@@ -10,17 +11,42 @@
 
                 <!-- Header Section -->
                 <VerticalStackLayout Spacing="12" Margin="8,16,8,8">
-                    <Label
-                        Text="🍔 Meal Log"
-                        FontSize="28"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource BrandPrimary}"
-                        HorizontalOptions="Start" />
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" VerticalOptions="Center">
+                        <mi:MauiIcon Icon="{mi:Material Icon=MenuBook}"
+                                     IconSize="28"
+                                     IconColor="{StaticResource BrandPrimary}" />
+                        <Label
+                            Text="Meal Log"
+                            FontSize="28"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource BrandPrimary}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
 
                     <Button
                         Text="+ Add Meal"
                         Command="{Binding AddMealCommand}"
                         BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="48"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+
+                    <Button
+                        Text="⚖ Log Weight"
+                        Command="{Binding LogWeightCommand}"
+                        BackgroundColor="{StaticResource BrandSecondary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="12"
+                        HeightRequest="48"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+
+                    <Button
+                        Text="🏃 Log Exercise"
+                        Command="{Binding LogExerciseCommand}"
+                        BackgroundColor="#4CAF50"
                         TextColor="{StaticResource White}"
                         CornerRadius="12"
                         HeightRequest="48"
@@ -93,6 +119,77 @@
                                 IsVisible="{Binding IsToday, Converter={StaticResource InvertedBoolConverter}}" />
                     </Grid>
                 </Border>
+
+                <!-- Exercise Section -->
+                <VerticalStackLayout Spacing="8" Margin="8,16,8,0"
+                                    IsVisible="{Binding HasExerciseLogs}">
+
+                    <HorizontalStackLayout Spacing="8">
+                        <mi:MauiIcon Icon="{mi:Material Icon=DirectionsRun}"
+                                     IconSize="20"
+                                     IconColor="#4CAF50" />
+                        <Label Text="Exercise"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#4CAF50"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <VerticalStackLayout Spacing="0"
+                                        BindableLayout.ItemsSource="{Binding ExerciseLogs}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="Delete"
+                                                      BackgroundColor="Red"
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteExerciseCommand}"
+                                                      CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+
+                                    <Border Margin="0,0,0,8"
+                                            Padding="16"
+                                            Stroke="#4CAF50"
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 12"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+
+                                            <!-- Activity + calories -->
+                                            <Label Grid.Row="0" Grid.Column="0"
+                                                   Text="{Binding ActivityType}"
+                                                   FontSize="17"
+                                                   FontAttributes="Bold" />
+                                            <Label Grid.Row="0" Grid.Column="1"
+                                                   Text="{Binding CaloriesBurned, StringFormat='-{0} cal'}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#4CAF50"
+                                                   VerticalOptions="Center" />
+
+                                            <!-- Duration + Intensity -->
+                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   Text="{Binding DurationDisplay}"
+                                                   FontSize="13"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+
+                                            <!-- Description (optional) -->
+                                            <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   Text="{Binding Description}"
+                                                   FontSize="13"
+                                                   FontAttributes="Italic"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                                   IsVisible="{Binding HasDescription}" />
+
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
 
                 <!-- Meal List Section -->
                 <VerticalStackLayout Spacing="0" Margin="0,0,0,16"
@@ -233,8 +330,15 @@
                                                                                                                                    TextColor="{StaticResource BrandPrimary}"
                                                                                                                                    VerticalOptions="Center" />
 
+                                                                                                                            <!-- Quantity -->
+                                                                                                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                                                                                                   Text="{Binding QuantityDisplay}"
+                                                                                                                                   FontSize="12"
+                                                                                                                                   TextColor="{StaticResource BrandSecondary}"
+                                                                                                                                   Margin="0,2,0,0" />
+
                                                                                                                             <!-- Macros -->
-                                                                                                                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                                                                                                            <HorizontalStackLayout Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
                                                                                                                                                  Spacing="12" 
                                                                                                                                                  Margin="0,4,0,0">
                                                                                                                                 <Label Text="{Binding Protein, StringFormat='P: {0:F1}g'}" 

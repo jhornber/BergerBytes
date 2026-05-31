@@ -8,10 +8,14 @@ namespace BergerBytes.App.ViewModels
     public class LogPageViewModel : BindableObject
     {
         private readonly IMealLogRepository _repository;
+        private readonly IExerciseLogRepository _exerciseRepository;
         private bool _isRefreshing;
         private DateTime _selectedDate = DateTime.Today;
 
         public ObservableCollection<MealGroup> MealGroups { get; } = new();
+        public ObservableCollection<ExerciseLog> ExerciseLogs { get; } = new();
+
+        public bool HasExerciseLogs => ExerciseLogs.Count > 0;
 
         public bool IsRefreshing
         {
@@ -78,19 +82,26 @@ namespace BergerBytes.App.ViewModels
         public ICommand DeleteItemCommand { get; }
         public ICommand EditMealCommand { get; }
         public ICommand AddMealCommand { get; }
+        public ICommand LogWeightCommand { get; }
+        public ICommand LogExerciseCommand { get; }
+        public ICommand DeleteExerciseCommand { get; }
         public ICommand PreviousDayCommand { get; }
         public Command NextDayCommand { get; }
         public Command GoToTodayCommand { get; }
         public ICommand SelectDateCommand { get; }
 
-        public LogPageViewModel(IMealLogRepository repository)
+        public LogPageViewModel(IMealLogRepository repository, IExerciseLogRepository exerciseRepository)
         {
             _repository = repository;
+            _exerciseRepository = exerciseRepository;
             RefreshCommand = new Command(async () => await RefreshMealLogsAsync());
             DeleteMealGroupCommand = new Command<MealGroup>(async (group) => await DeleteMealGroupAsync(group));
             DeleteItemCommand = new Command<MealLog>(async (meal) => await DeleteMealAsync(meal));
             EditMealCommand = new Command<MealGroup>(async (group) => await NavigateToEditMealAsync(group));
             AddMealCommand = new Command(async () => await NavigateToAddMealAsync());
+            LogWeightCommand = new Command(async () => await Shell.Current.GoToAsync("WeightLogPage"));
+            LogExerciseCommand = new Command(async () => await Shell.Current.GoToAsync("ExerciseLogPage"));
+            DeleteExerciseCommand = new Command<ExerciseLog>(async (entry) => await DeleteExerciseAsync(entry));
             PreviousDayCommand = new Command(() => SelectedDate = SelectedDate.AddDays(-1));
             NextDayCommand = new Command(() => SelectedDate = SelectedDate.AddDays(1), () => CanGoToNextDay);
             GoToTodayCommand = new Command(() => SelectedDate = DateTime.Today, () => !IsToday);
@@ -153,6 +164,19 @@ namespace BergerBytes.App.ViewModels
                 {
                     MealGroups.Add(group);
                 }
+
+                // Load exercises for selected date
+                var allExercises = await _exerciseRepository.GetExerciseLogsAsync();
+                var filteredExercises = allExercises
+                    .Where(e => e.LoggedAt >= selectedDateStart && e.LoggedAt < selectedDateEnd)
+                    .OrderBy(e => e.LoggedAt)
+                    .ToList();
+
+                ExerciseLogs.Clear();
+                foreach (var ex in filteredExercises)
+                    ExerciseLogs.Add(ex);
+
+                OnPropertyChanged(nameof(HasExerciseLogs));
 
                 // Update daily summary properties
                 OnPropertyChanged(nameof(DailyTotalCalories));
@@ -257,6 +281,14 @@ namespace BergerBytes.App.ViewModels
             OnPropertyChanged(nameof(DailySummaryCalories));
             OnPropertyChanged(nameof(DailySummaryMacros));
             OnPropertyChanged(nameof(DailyMealCountDisplay));
+        }
+
+        private async Task DeleteExerciseAsync(ExerciseLog entry)
+        {
+            if (entry == null) return;
+            await _exerciseRepository.DeleteExerciseLogAsync(entry.Id);
+            ExerciseLogs.Remove(entry);
+            OnPropertyChanged(nameof(HasExerciseLogs));
         }
     }
 }
