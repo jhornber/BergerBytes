@@ -32,6 +32,7 @@ namespace BergerBytes.App.Pages
         protected override async void OnNavigatedTo(NavigatedToEventArgs args)
         {
             base.OnNavigatedTo(args);
+            await _viewModel.ProcessPendingRecentFoodAsync();
             await _viewModel.ProcessPendingFoodProductAsync();
             await _viewModel.ProcessPendingBarcodeAsync();
             await _viewModel.ProcessPendingFoodEntryAsync();

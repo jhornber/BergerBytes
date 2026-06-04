@@ -187,7 +187,7 @@
                     <Grid ColumnDefinitions="*,Auto">
                         <VerticalStackLayout VerticalOptions="Center">
                             <Label Text="Activity Level" FontSize="16" />
-                            <Label Text="How active are you on a typical day?"
+                            <Label Text="Day-to-day activity only — workouts are logged separately."
                                    FontSize="12"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                         </VerticalStackLayout>
@@ -279,18 +279,21 @@
                     <BoxView HeightRequest="1"
                              Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
 
-                    <!-- Timeframe -->
+                    <!-- Pace -->
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Timeframe"
+                        <Label Text="{Binding WeightUnit, StringFormat='Pace ({0}/week)'}"
                                FontSize="14"
                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        <Label Text="How fast do you want to reach your goal?"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                         <HorizontalStackLayout Spacing="12">
-                            <Entry Text="{Binding WeightGoalWeeksText}"
+                            <Entry Text="{Binding WeightGoalPaceText}"
                                    Keyboard="Numeric"
-                                   Placeholder="e.g. 8"
+                                   Placeholder="e.g. 0.5"
                                    WidthRequest="120"
                                    HorizontalOptions="Start" />
-                            <Label Text="weeks"
+                            <Label Text="{Binding WeightUnit, StringFormat='{0}/week'}"
                                    FontSize="16"
                                    VerticalOptions="Center" />
                         </HorizontalStackLayout>

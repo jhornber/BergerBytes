@@ -47,6 +47,8 @@ namespace BergerBytes.App
             builder.Services.AddTransient<FoodSearchPage>();
             builder.Services.AddTransient<WeightLogPage>();
             builder.Services.AddTransient<ExerciseLogPage>();
+            builder.Services.AddTransient<OnboardingPage>();
+            builder.Services.AddTransient<ManualAddFoodPage>();
 
             // Register ViewModels
             builder.Services.AddTransient<EditMealPageViewModel>();

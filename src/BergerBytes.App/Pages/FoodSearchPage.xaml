@@ -46,7 +46,9 @@
         </Grid>
 
         <!-- Results Area -->
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="1"
+                    x:Name="MainScrollView"
+                    Scrolled="OnScrolled">
             <VerticalStackLayout>
 
                 <!-- Recent Items Section -->
@@ -58,6 +60,62 @@
                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                            Margin="0,0,0,4" />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:RecentFoodItem">
+                                <Border Margin="0,4"
+                                        Padding="12"
+                                        StrokeThickness="1"
+                                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding FoodName}"
+                                                   FontSize="15"
+                                                   FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation"
+                                                   MaxLines="1" />
+                                            <Label Text="{Binding ServingSummary}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource BrandSecondary}" />
+                                            <Label Text="{Binding MacrosSummary}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding CaloriesSummary}"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource BrandPrimary}"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FoodSearchPageViewModel}}, Path=SelectRecentCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <!-- Load More Indicator for Recent Items -->
+                    <ActivityIndicator IsRunning="{Binding IsLoadingMoreRecents}"
+                                       IsVisible="{Binding IsLoadingMoreRecents}"
+                                       Color="{StaticResource BrandPrimary}"
+                                       HorizontalOptions="Center"
+                                       Margin="0,8,0,4" />
+
+                </VerticalStackLayout>
+
+                <!-- Matching Recent Items (shown immediately when search query matches history) -->
+                <VerticalStackLayout IsVisible="{Binding HasMatchingRecents}"
+                                     Padding="16,8,16,0">
+                    <Label Text="From Your History"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                           Margin="0,0,0,4" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding MatchingRecentItems}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:RecentFoodItem">
                                 <Border Margin="0,4"
@@ -114,10 +172,15 @@
                        HorizontalTextAlignment="Center"
                        Margin="32,32" />
 
-                <!-- Search Results List -->
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding SearchResults}"
-                                     IsVisible="{Binding IsSearching, Converter={StaticResource InvertedBoolConverter}}"
-                                     Padding="16,0,16,16">
+                <!-- API Results Section -->
+                <VerticalStackLayout IsVisible="{Binding HasApiResults}">
+                    <Label Text="Open Food Facts Results"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                           Padding="16,8,16,4" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding SearchResults}"
+                                         Padding="16,0,16,16">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="dto:FoodProductDTO">
                             <Border Margin="0,4"
@@ -162,6 +225,7 @@
                             </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

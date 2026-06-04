@@ -77,13 +77,13 @@
                            VerticalOptions="Center" />
                 </HorizontalStackLayout>
 
-                <!-- Current Food Entry Form -->
+                <!-- Add Food Buttons -->
                 <Border Stroke="{StaticResource BrandPrimaryBrush}"
                         StrokeThickness="2"
                         StrokeShape="RoundRectangle 12"
                         Padding="16"
                         BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                    <VerticalStackLayout Spacing="12">
+                    <VerticalStackLayout Spacing="10">
                         <Label Text="Add Food Item" FontSize="16" FontAttributes="Bold" />
 
                         <!-- Scanned Barcode Display -->
@@ -135,73 +135,22 @@
                                 HeightRequest="44"
                                 IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
 
+                        <!-- Enter Manually Button -->
+                        <Button Text="✏️ Enter Manually"
+                                Command="{Binding ManualAddFoodCommand}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                                TextColor="{StaticResource BrandPrimary}"
+                                BorderColor="{StaticResource BrandPrimary}"
+                                BorderWidth="1"
+                                CornerRadius="8"
+                                HeightRequest="44"
+                                IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
+
                         <!-- Loading Indicator -->
                         <ActivityIndicator IsRunning="{Binding IsLoadingProduct}"
                                           IsVisible="{Binding IsLoadingProduct}"
                                           Color="{StaticResource BrandPrimary}"
                                           HeightRequest="40" />
-
-                        <BoxView HeightRequest="1" 
-                                 Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                 Margin="0,8,0,8" />
-
-                        <!-- Food Name (Required) -->
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Food Name *" FontSize="14" TextColor="{StaticResource BrandPrimary}" />
-                            <Entry Text="{Binding CurrentFoodName}" 
-                                   Placeholder="e.g., Chicken Breast"
-                                   FontSize="16" />
-                        </VerticalStackLayout>
-
-                        <!-- Calories (Required) -->
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Calories *" FontSize="14" TextColor="{StaticResource BrandPrimary}" />
-                            <Entry Text="{Binding CurrentCalories}" 
-                                   Keyboard="Numeric"
-                                   Placeholder="e.g., 250"
-                                   FontSize="16" />
-                        </VerticalStackLayout>
-
-                        <!-- Macros (Optional) -->
-                        <Label Text="Macros (Optional)" FontSize="14" FontAttributes="Italic" TextColor="{StaticResource Gray600}" />
-
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                            <!-- Protein -->
-                            <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                <Label Text="Protein (g)" FontSize="12" />
-                                <Entry Text="{Binding CurrentProtein}" 
-                                       Keyboard="Numeric"
-                                       Placeholder="0"
-                                       FontSize="14" />
-                            </VerticalStackLayout>
-
-                            <!-- Carbs -->
-                            <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Carbs (g)" FontSize="12" />
-                                <Entry Text="{Binding CurrentCarbs}" 
-                                       Keyboard="Numeric"
-                                       Placeholder="0"
-                                       FontSize="14" />
-                            </VerticalStackLayout>
-
-                            <!-- Fat -->
-                            <VerticalStackLayout Grid.Column="2" Spacing="4">
-                                <Label Text="Fat (g)" FontSize="12" />
-                                <Entry Text="{Binding CurrentFat}" 
-                                       Keyboard="Numeric"
-                                       Placeholder="0"
-                                       FontSize="14" />
-                            </VerticalStackLayout>
-                        </Grid>
-
-                        <!-- Add Item Button -->
-                        <Button Text="+ Add This Item"
-                                Command="{Binding AddFoodItemCommand}"
-                                BackgroundColor="{StaticResource BrandSecondary}"
-                                TextColor="{StaticResource White}"
-                                CornerRadius="8"
-                                HeightRequest="44"
-                                Margin="0,8,0,0" />
 
                     </VerticalStackLayout>
                 </Border>
@@ -227,7 +176,7 @@
                                         Padding="12"
                                         Margin="0,4"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
-                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
                                         <Label Grid.Row="0" Grid.Column="0"
                                                Text="{Binding Name}"
                                                FontSize="16"
@@ -238,11 +187,22 @@
                                                TextColor="{StaticResource BrandSecondary}"
                                                VerticalOptions="Center" />
                                         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Text="{Binding BrandName}"
+                                               FontSize="12"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                               Margin="0,2,0,0">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding BrandName}" Value="">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                                Text="{Binding QuantityDisplay}"
                                                FontSize="12"
                                                TextColor="{StaticResource BrandSecondary}"
                                                Margin="0,2,0,0" />
-                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                        <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                                FontSize="12"
                                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}"
                                                Margin="0,4,0,0">

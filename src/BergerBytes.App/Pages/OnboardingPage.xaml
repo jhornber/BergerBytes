@@ -1,0 +1,613 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:BergerBytes.App.Converters"
+             x:Class="BergerBytes.App.Pages.OnboardingPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource BrandSurface}}">
+
+    <ContentPage.Resources>
+        <conv:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header: progress bar + step label -->
+        <VerticalStackLayout Grid.Row="0" Padding="24,20,24,8" Spacing="6">
+            <ProgressBar Progress="{Binding Progress}"
+                         ProgressColor="{StaticResource BrandPrimary}"
+                         HeightRequest="6" />
+            <Label Text="{Binding StepIndicatorText}"
+                   FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                   HorizontalOptions="End" />
+        </VerticalStackLayout>
+
+        <!-- Scrollable content area -->
+        <ScrollView Grid.Row="1">
+            <Grid Padding="24,8,24,16">
+
+                <!-- STEP 0: WELCOME -->
+                <VerticalStackLayout IsVisible="{Binding IsStep0}" Spacing="24" VerticalOptions="Center">
+
+                    <Label Text="👋 Welcome to BergerBytes!"
+                           FontSize="30"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+
+                    <Label Text="Your personal nutrition co-pilot — built for athletes, adventurers, and everyone in between."
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <BoxView HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                    <Label Text="In the next 2 minutes we'll set up:"
+                           FontSize="15"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="⚖️  Your current weight" FontSize="15" />
+                        <Label Text="🧬  Body metrics for your personalized calorie target" FontSize="15" />
+                        <Label Text="🏃  Your day-to-day activity level" FontSize="15" />
+                        <Label Text="🥗  Macro split that matches your training style" FontSize="15" />
+                        <Label Text="🎯  Your weight goal and weekly pace" FontSize="15" />
+                    </VerticalStackLayout>
+
+                    <Label Text="Everything can be changed later in Settings."
+                           FontSize="13"
+                           FontAttributes="Italic"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+
+                <!-- STEP 1: UNITS -->
+                <VerticalStackLayout IsVisible="{Binding IsStep1}" Spacing="24">
+
+                    <Label Text="📏 First, pick your units"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}" />
+
+                    <Label Text="This affects how weight, height, and pace are shown throughout the app. You can switch it any time in Settings."
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Margin="0,8,0,0">
+
+                        <Button Grid.Column="0"
+                                Text="kg&#10;Kilograms"
+                                Command="{Binding SelectKgCommand}"
+                                CornerRadius="16"
+                                HeightRequest="100"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                LineBreakMode="WordWrap">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding WeightUnit}" Value="kg">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}" />
+                                    <Setter Property="TextColor" Value="{StaticResource White}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding WeightUnit}" Value="lbs">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                                    <Setter Property="TextColor" Value="{StaticResource BrandPrimary}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+
+                        <Button Grid.Column="1"
+                                Text="lbs&#10;Pounds"
+                                Command="{Binding SelectLbsCommand}"
+                                CornerRadius="16"
+                                HeightRequest="100"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                LineBreakMode="WordWrap">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding WeightUnit}" Value="lbs">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}" />
+                                    <Setter Property="TextColor" Value="{StaticResource White}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding WeightUnit}" Value="kg">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                                    <Setter Property="TextColor" Value="{StaticResource BrandPrimary}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- STEP 2: CURRENT WEIGHT -->
+                <VerticalStackLayout IsVisible="{Binding IsStep2}" Spacing="24">
+
+                    <Label Text="⚖️ What do you weigh right now?"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}" />
+
+                    <Label Text="This is your starting line — only you can see it. We use it to calculate your calorie needs and track progress over time."
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="20">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="{Binding WeightUnitLabel, StringFormat='Current weight ({0})'}"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                            <HorizontalStackLayout Spacing="12">
+                                <Entry Text="{Binding CurrentWeightText}"
+                                       Keyboard="Numeric"
+                                       Placeholder="e.g. 80"
+                                       FontSize="24"
+                                       WidthRequest="150" />
+                                <Label Text="{Binding WeightUnitLabel}"
+                                       FontSize="22"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource BrandPrimary}"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="💡 This will be saved as your first weight log entry."
+                           FontSize="13"
+                           FontAttributes="Italic"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+
+                </VerticalStackLayout>
+
+                <!-- STEP 3: BODY METRICS -->
+                <VerticalStackLayout IsVisible="{Binding IsStep3}" Spacing="20">
+
+                    <Label Text="🧬 Tell us about yourself"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}" />
+
+                    <Label Text="These details help us estimate how many calories your body burns each day. Without them, your targets are just guesses."
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="20">
+                        <VerticalStackLayout Spacing="18">
+
+                            <!-- Age -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="🎂 Age" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Metabolic rate changes with age — this feeds directly into the calorie formula."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <HorizontalStackLayout Spacing="10">
+                                    <Entry Text="{Binding AgeText}"
+                                           Keyboard="Numeric"
+                                           Placeholder="e.g. 30"
+                                           WidthRequest="120" />
+                                    <Label Text="years" FontSize="15" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <BoxView HeightRequest="1"
+                                     Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                            <!-- Sex -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="🧑 Biological Sex" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Men and women have different baseline metabolic rates — this adjusts your calorie calculation."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Button Grid.Column="0"
+                                            Text="Male"
+                                            Command="{Binding SelectMaleCommand}"
+                                            CornerRadius="10"
+                                            HeightRequest="48"
+                                            FontAttributes="Bold"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                            TextColor="{StaticResource BrandPrimary}">
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding SelectedSex}" Value="Male">
+                                                <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}" />
+                                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+                                    <Button Grid.Column="1"
+                                            Text="Female"
+                                            Command="{Binding SelectFemaleCommand}"
+                                            CornerRadius="10"
+                                            HeightRequest="48"
+                                            FontAttributes="Bold"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                            TextColor="{StaticResource BrandPrimary}">
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding SelectedSex}" Value="Female">
+                                                <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}" />
+                                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <BoxView HeightRequest="1"
+                                     Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                            <!-- Height -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="{Binding HeightUnit, StringFormat='📐 Height ({0})'}"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                <Label Text="Height combined with weight helps estimate body composition and calorie burn."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <HorizontalStackLayout Spacing="10">
+                                    <Entry Text="{Binding HeightText}"
+                                           Keyboard="Numeric"
+                                           Placeholder="e.g. 178"
+                                           WidthRequest="120" />
+                                    <Label Text="{Binding HeightUnit}" FontSize="15" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- STEP 4: ACTIVITY LEVEL -->
+                <VerticalStackLayout IsVisible="{Binding IsStep4}" Spacing="20">
+
+                    <Label Text="🏃 How active are you?"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}" />
+
+                    <Label Text="This is your baseline day-to-day activity — not your workouts. Exercises you log in the app are tracked separately."
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <Label Text="Be honest — there's no wrong answer, just accurate ones!"
+                           FontSize="13"
+                           FontAttributes="Italic"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="16">
+                        <Picker ItemsSource="{Binding ActivityLevels}"
+                                SelectedItem="{Binding SelectedActivityLevel}"
+                                FontSize="16"
+                                Title="Select activity level" />
+                    </Border>
+
+                    <Border Stroke="{StaticResource BrandSecondaryBrush}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="16"
+                            BackgroundColor="{AppThemeBinding Light=#FFF8EE, Dark=#2C2416}">
+                        <Label Text="{Binding ActivityLevelDescription}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                    </Border>
+
+                    <Border IsVisible="{Binding HasTdeeEstimate}"
+                            Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="16"
+                            BackgroundColor="{AppThemeBinding Light=#FFF2EE, Dark=#2A1810}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Your estimated daily burn:"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                            <Label Text="{Binding TdeeEstimateDisplay}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandPrimary}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- STEP 5: MACRO SPLIT -->
+                <VerticalStackLayout IsVisible="{Binding IsStep5}" Spacing="20">
+
+                    <Label Text="🥗 Your nutrition style"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}" />
+
+                    <Label Text="Pick the macro preset that best fits your lifestyle. This controls how protein, carbs, and fat targets are split. Fine-tune the numbers manually at any time."
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="16">
+                        <Picker ItemsSource="{Binding DietPresets}"
+                                SelectedItem="{Binding SelectedDietPreset}"
+                                FontSize="16"
+                                Title="Choose a macro preset" />
+                    </Border>
+
+                    <Border Stroke="{StaticResource BrandSecondaryBrush}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="16"
+                            BackgroundColor="{AppThemeBinding Light=#FFF8EE, Dark=#2C2416}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{Binding SelectedDietPreset}"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandSecondary}" />
+                            <Label Text="{Binding DietPresetDescription}"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="💡 Macro targets will be calculated and saved when you finish setup."
+                           FontSize="13"
+                           FontAttributes="Italic"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+
+                </VerticalStackLayout>
+
+                <!-- STEP 6: WEIGHT GOAL -->
+                <VerticalStackLayout IsVisible="{Binding IsStep6}" Spacing="20">
+
+                    <Label Text="🎯 What's the goal?"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}" />
+
+                    <Label Text="Lose fat, build muscle, or just maintain? Set your target and weekly pace. A sustainable pace protects your muscle — and your sanity."
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <!-- Maintain toggle -->
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="16">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout VerticalOptions="Center">
+                                <Label Text="🧘 I just want to maintain" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Keep your current weight — calorie target set to maintenance."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding IsMaintainMode}"
+                                    OnColor="{StaticResource BrandPrimary}"
+                                    VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Goal inputs -->
+                    <VerticalStackLayout IsVisible="{Binding ShowGoalInputs}" Spacing="16">
+
+                        <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 16"
+                                Padding="20">
+                            <VerticalStackLayout Spacing="18">
+
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding WeightUnit, StringFormat='🏁 Target weight ({0})'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
+                                    <Label Text="Where do you want to end up? This is your destination."
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Entry Text="{Binding WeightGoalText}"
+                                               Keyboard="Numeric"
+                                               Placeholder="e.g. 75"
+                                               FontSize="20"
+                                               WidthRequest="140" />
+                                        <Label Text="{Binding WeightUnit}"
+                                               FontSize="18"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource BrandPrimary}"
+                                               VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <BoxView HeightRequest="1"
+                                         Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding WeightUnit, StringFormat='⏱ Pace ({0}/week)'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
+                                    <Label Text="0.5–1.0 kg/week (1–2 lbs/week) is the sweet spot — fast enough to see progress, slow enough to keep your muscle."
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Entry Text="{Binding WeightGoalPaceText}"
+                                               Keyboard="Numeric"
+                                               Placeholder="e.g. 0.5"
+                                               FontSize="20"
+                                               WidthRequest="140" />
+                                        <Label Text="{Binding WeightUnit, StringFormat='{0}/week'}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource BrandPrimary}"
+                                               VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border IsVisible="{Binding HasWeightGoalHint}"
+                                Stroke="{StaticResource BrandSecondaryBrush}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="14"
+                                BackgroundColor="{AppThemeBinding Light=#FFF8EE, Dark=#2C2416}">
+                            <Label Text="{Binding WeightGoalHint}"
+                                   FontSize="14"
+                                   FontAttributes="Italic"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        </Border>
+
+                    </VerticalStackLayout>
+
+                    <!-- Maintain mode confirmation -->
+                    <Border IsVisible="{Binding IsMaintainMode}"
+                            Stroke="{StaticResource BrandSecondaryBrush}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="14"
+                            BackgroundColor="{AppThemeBinding Light=#FFF8EE, Dark=#2C2416}">
+                        <Label Text="{Binding WeightGoalHint}"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- STEP 7: DONE! -->
+                <VerticalStackLayout IsVisible="{Binding IsStep7}" Spacing="24" VerticalOptions="Center">
+
+                    <Label Text="🚀 You're all set!"
+                           FontSize="34"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource BrandPrimary}"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+
+                    <Label Text="Here's what we've configured for you:"
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+
+                    <Border Stroke="{StaticResource BrandPrimaryBrush}"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="20">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding SummaryRows}" Spacing="0">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <VerticalStackLayout Spacing="0">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Padding="0,10">
+                                            <Label Text="{Binding Label}"
+                                                   FontSize="13"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding Value}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource BrandPrimary}" />
+                                        </Grid>
+                                        <BoxView HeightRequest="1"
+                                                 Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="Macro targets have been calculated and saved. Fine-tune everything in Settings whenever you like."
+                           FontSize="14"
+                           FontAttributes="Italic"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+
+                    <ActivityIndicator IsRunning="{Binding IsSaving}"
+                                       IsVisible="{Binding IsSaving}"
+                                       Color="{StaticResource BrandPrimary}"
+                                       HorizontalOptions="Center" />
+
+                </VerticalStackLayout>
+
+            </Grid>
+        </ScrollView>
+
+        <!-- Footer: navigation buttons -->
+        <Grid Grid.Row="2" Padding="24,8,24,28">
+
+            <!-- Welcome: full-width Get Started -->
+            <Button Text="Get Started →"
+                    IsVisible="{Binding IsStep0}"
+                    Command="{Binding NextCommand}"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    TextColor="{StaticResource White}"
+                    CornerRadius="14"
+                    HeightRequest="56"
+                    FontAttributes="Bold"
+                    FontSize="18" />
+
+            <!-- Middle steps 1-6: back + next -->
+            <Grid IsVisible="{Binding IsMiddleStep}"
+                  ColumnDefinitions="*,*"
+                  ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        Text="← Back"
+                        Command="{Binding BackCommand}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource White}}"
+                        CornerRadius="14"
+                        HeightRequest="52"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+                <Button Grid.Column="1"
+                        Text="Next →"
+                        Command="{Binding NextCommand}"
+                        IsEnabled="{Binding CanGoNext}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="14"
+                        HeightRequest="52"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+            </Grid>
+
+            <!-- Done: back + Let's Go -->
+            <Grid IsVisible="{Binding IsFinalStep}"
+                  ColumnDefinitions="*,*"
+                  ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        Text="← Back"
+                        Command="{Binding BackCommand}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource White}}"
+                        CornerRadius="14"
+                        HeightRequest="52"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+                <Button Grid.Column="1"
+                        Text="Let's Go! 🚀"
+                        Command="{Binding FinishCommand}"
+                        IsEnabled="{Binding IsSaving, Converter={StaticResource InvertedBoolConverter}}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="14"
+                        HeightRequest="52"
+                        FontAttributes="Bold"
+                        FontSize="16" />
+            </Grid>
+
+        </Grid>
+    </Grid>
+</ContentPage>

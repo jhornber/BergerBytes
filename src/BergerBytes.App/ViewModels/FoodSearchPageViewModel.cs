@@ -14,9 +14,14 @@ namespace BergerBytes.App.ViewModels
         private bool _isSearching = false;
         private bool _hasNoResults = false;
         private bool _hasRecentItems = false;
+        private bool _isLoadingMoreRecents = false;
+        private bool _hasMoreRecents = true;
+        private int _recentOffset = 0;
+        private const int RecentPageSize = 10;
 
         public ObservableCollection<FoodProductDTO> SearchResults { get; } = new();
         public ObservableCollection<RecentFoodItem> RecentItems { get; } = new();
+        public ObservableCollection<RecentFoodItem> MatchingRecentItems { get; } = new();
 
         public string SearchQuery
         {
@@ -25,6 +30,8 @@ namespace BergerBytes.App.ViewModels
             {
                 _searchQuery = value;
                 OnPropertyChanged();
+                if (string.IsNullOrWhiteSpace(value))
+                    ClearSearchState();
             }
         }
 
@@ -60,7 +67,40 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
-        public bool ShowRecentItems => _hasRecentItems && !_isSearching && SearchResults.Count == 0;
+        public bool ShowRecentItems => _hasRecentItems && !_isSearching && SearchResults.Count == 0 && !_hasMatchingRecents && !_hasNoResults;
+
+        public bool IsLoadingMoreRecents
+        {
+            get => _isLoadingMoreRecents;
+            set
+            {
+                _isLoadingMoreRecents = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _hasMatchingRecents = false;
+        public bool HasMatchingRecents
+        {
+            get => _hasMatchingRecents;
+            set
+            {
+                _hasMatchingRecents = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ShowRecentItems));
+            }
+        }
+
+        private bool _hasApiResults = false;
+        public bool HasApiResults
+        {
+            get => _hasApiResults;
+            set
+            {
+                _hasApiResults = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ICommand SearchCommand { get; }
         public ICommand SelectProductCommand { get; }
@@ -77,11 +117,35 @@ namespace BergerBytes.App.ViewModels
 
         public async Task LoadRecentItemsAsync()
         {
-            var recents = await _recentFoodRepository.GetRecentFoodsAsync(20);
+            _recentOffset = 0;
+            _hasMoreRecents = true;
+            var recents = await _recentFoodRepository.GetRecentFoodsAsync(RecentPageSize, 0);
             RecentItems.Clear();
             foreach (var item in recents)
                 RecentItems.Add(item);
+            _recentOffset = recents.Count;
+            _hasMoreRecents = recents.Count == RecentPageSize;
             HasRecentItems = RecentItems.Count > 0;
+        }
+
+        public async Task LoadMoreRecentItemsAsync()
+        {
+            if (_isLoadingMoreRecents || !_hasMoreRecents || !ShowRecentItems) return;
+
+            IsLoadingMoreRecents = true;
+            try
+            {
+                var recents = await _recentFoodRepository.GetRecentFoodsAsync(RecentPageSize, _recentOffset);
+                foreach (var item in recents)
+                    RecentItems.Add(item);
+                _recentOffset += recents.Count;
+                _hasMoreRecents = recents.Count == RecentPageSize;
+                HasRecentItems = RecentItems.Count > 0;
+            }
+            finally
+            {
+                IsLoadingMoreRecents = false;
+            }
         }
 
         private async Task SearchAsync()
@@ -91,27 +155,47 @@ namespace BergerBytes.App.ViewModels
 
             IsSearching = true;
             HasNoResults = false;
+            HasApiResults = false;
             SearchResults.Clear();
-            OnPropertyChanged(nameof(ShowRecentItems));
+            MatchingRecentItems.Clear();
+            HasMatchingRecents = false;
 
             try
             {
-                var results = await _foodService.SearchFoodAsync(SearchQuery);
-                foreach (var result in results)
-                    SearchResults.Add(result);
+                // Local search is instant — show results before the API responds
+                var localResults = await _recentFoodRepository.SearchRecentFoodsAsync(SearchQuery.Trim());
+                foreach (var item in localResults)
+                    MatchingRecentItems.Add(item);
+                HasMatchingRecents = MatchingRecentItems.Count > 0;
 
-                HasNoResults = SearchResults.Count == 0;
+                // API search
+                var apiResults = await _foodService.SearchFoodAsync(SearchQuery);
+                foreach (var result in apiResults)
+                    SearchResults.Add(result);
+                HasApiResults = SearchResults.Count > 0;
+
+                HasNoResults = MatchingRecentItems.Count == 0 && SearchResults.Count == 0;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Food search error: {ex.Message}");
-                HasNoResults = true;
+                HasNoResults = MatchingRecentItems.Count == 0;
             }
             finally
             {
                 IsSearching = false;
                 OnPropertyChanged(nameof(ShowRecentItems));
             }
+        }
+
+        private void ClearSearchState()
+        {
+            HasNoResults = false;
+            HasApiResults = false;
+            HasMatchingRecents = false;
+            SearchResults.Clear();
+            MatchingRecentItems.Clear();
+            OnPropertyChanged(nameof(ShowRecentItems));
         }
 
         private async Task SelectProductAsync(FoodProductDTO product)
@@ -126,14 +210,7 @@ namespace BergerBytes.App.ViewModels
         {
             await Shell.Current.GoToAsync("..", new Dictionary<string, object>
             {
-                { "FoodName", item.FoodName },
-                { "Calories", item.Calories.ToString("F0") },
-                { "Protein", item.Protein.ToString("F1") },
-                { "Carbs", item.Carbs.ToString("F1") },
-                { "Fat", item.Fat.ToString("F1") },
-                { "Barcode", item.Barcode },
-                { "Quantity", item.Quantity.ToString("G") },
-                { "Unit", item.Unit }
+                { "SelectedRecentFood", item }
             });
         }
     }

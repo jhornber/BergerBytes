@@ -186,6 +186,10 @@
                                        FontSize="20"
                                        FontAttributes="Bold"
                                        TextColor="{StaticResource BrandSecondary}" />
+                                <Label Text="{Binding WeightGoalEtaDisplay}"
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                       IsVisible="{Binding HasWeightGoal}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End" Spacing="2">
                                 <Label Text="Pace"
@@ -210,7 +214,7 @@
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12"
                                   IsVisible="{Binding HasProfileData}">
                                 <Label Grid.Column="0"
-                                       Text="Maintenance (TDEE)"
+                                       Text="Calories to maintain weight"
                                        FontSize="13"
                                        VerticalOptions="Center"
                                        TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
