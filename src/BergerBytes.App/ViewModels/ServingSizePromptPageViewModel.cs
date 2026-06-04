@@ -1,13 +1,21 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BergerBytes.Shared.DTOs;
+using BergerBytes.Shared.Models;
 
 namespace BergerBytes.App.ViewModels
 {
     [QueryProperty(nameof(FoodProduct), "FoodProduct")]
+    [QueryProperty(nameof(RecentFood), "RecentFood")]
     public class ServingSizePromptPageViewModel : BindableObject
     {
         private FoodProductDTO? _foodProduct;
+        private RecentFoodItem? _recentFood;
+        private bool _isRecentFood;
+        private double _recentPerUnitCals;
+        private double _recentPerUnitProtein;
+        private double _recentPerUnitCarbs;
+        private double _recentPerUnitFat;
         private readonly ObservableCollection<string> _units = new();
         private string _quantity = "1";
         private int _selectedUnitIndex = 0;
@@ -39,6 +47,34 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
+        public RecentFoodItem? RecentFood
+        {
+            set
+            {
+                if (value == null) return;
+                _recentFood = value;
+                _isRecentFood = true;
+
+                var qty = value.Quantity > 0 ? value.Quantity : 1;
+                _recentPerUnitCals    = value.Calories / qty;
+                _recentPerUnitProtein = value.Protein  / qty;
+                _recentPerUnitCarbs   = value.Carbs    / qty;
+                _recentPerUnitFat     = value.Fat      / qty;
+
+                // Default quantity to the amount last used
+                _quantity = value.Quantity.ToString("G");
+
+                OnPropertyChanged(nameof(IsRecentFood));
+                OnPropertyChanged(nameof(RecentFoodUnit));
+                OnPropertyChanged(nameof(ProductName));
+                OnPropertyChanged(nameof(Quantity));
+                UpdateNutritionPreview();
+            }
+        }
+
+        public bool IsRecentFood => _isRecentFood;
+        public string RecentFoodUnit => _recentFood?.Unit ?? string.Empty;
+
         public string Quantity
         {
             get => _quantity;
@@ -61,7 +97,9 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
-        public string ProductName => _foodProduct?.ProductName ?? "Unknown Product";
+        public string ProductName => _isRecentFood
+            ? (_recentFood?.FoodName ?? string.Empty)
+            : (_foodProduct?.ProductName ?? "Unknown Product");
         public string Barcode => _foodProduct?.Barcode ?? "";
         public bool HasServingSizeInfo => !string.IsNullOrWhiteSpace(_foodProduct?.ServingSizeText);
         public string ServingSizeHintText => HasServingSizeInfo ? $"Suggested serving: {_foodProduct!.ServingSizeText}" : "";
@@ -146,6 +184,21 @@ namespace BergerBytes.App.ViewModels
 
         private void UpdateNutritionPreview()
         {
+            if (_isRecentFood)
+            {
+                if (!double.TryParse(Quantity, out var qty) || qty <= 0)
+                {
+                    ShowNutritionPreview = false;
+                    return;
+                }
+                PreviewCalories = _recentPerUnitCals    * qty;
+                PreviewProtein  = _recentPerUnitProtein * qty;
+                PreviewCarbs    = _recentPerUnitCarbs   * qty;
+                PreviewFat      = _recentPerUnitFat     * qty;
+                ShowNutritionPreview = true;
+                return;
+            }
+
             if (_foodProduct == null || !_foodProduct.IsFound ||
                 !double.TryParse(Quantity, out var quantity) || quantity <= 0)
             {
@@ -192,25 +245,44 @@ namespace BergerBytes.App.ViewModels
 
         private async Task AddToMealAsync()
         {
-            if (_foodProduct == null) return;
-
             if (!double.TryParse(Quantity, out var quantity) || quantity <= 0)
             {
-                await Application.Current!.MainPage!.DisplayAlertAsync(
-                    "Invalid Quantity", "Please enter a valid quantity greater than 0.", "OK");
+                var p = Application.Current?.Windows[0].Page;
+                if (p != null)
+                    await p.DisplayAlertAsync("Invalid Quantity", "Please enter a valid quantity greater than 0.", "OK");
                 return;
             }
 
+            if (_isRecentFood && _recentFood != null)
+            {
+                await Shell.Current.GoToAsync("..", new Dictionary<string, object>
+                {
+                    { "FoodName",   _recentFood.FoodName },
+                    { "Calories",   (_recentPerUnitCals    * quantity).ToString("F1") },
+                    { "Protein",    (_recentPerUnitProtein * quantity).ToString("F1") },
+                    { "Carbs",      (_recentPerUnitCarbs   * quantity).ToString("F1") },
+                    { "Fat",        (_recentPerUnitFat     * quantity).ToString("F1") },
+                    { "Barcode",    _recentFood.Barcode },
+                    { "Quantity",   Quantity },
+                    { "Unit",       _recentFood.Unit },
+                    { "EntryToken", Guid.NewGuid().ToString() }
+                });
+                return;
+            }
+
+            if (_foodProduct == null) return;
+
             await Shell.Current.GoToAsync("..", new Dictionary<string, object>
             {
-                { "FoodName", _foodProduct.ProductName },
-                { "Calories", PreviewCalories.ToString("F0") },
-                { "Protein", PreviewProtein.ToString("F1") },
-                { "Carbs", PreviewCarbs.ToString("F1") },
-                { "Fat", PreviewFat.ToString("F1") },
-                { "Barcode", _foodProduct.Barcode },
-                { "Quantity", Quantity },
-                { "Unit", _units[SelectedUnitIndex] }
+                { "FoodName",   _foodProduct.ProductName },
+                { "Calories",   PreviewCalories.ToString("F0") },
+                { "Protein",    PreviewProtein.ToString("F1") },
+                { "Carbs",      PreviewCarbs.ToString("F1") },
+                { "Fat",        PreviewFat.ToString("F1") },
+                { "Barcode",    _foodProduct.Barcode },
+                { "Quantity",   Quantity },
+                { "Unit",       _units[SelectedUnitIndex] },
+                { "EntryToken", Guid.NewGuid().ToString() }
             });
         }
 

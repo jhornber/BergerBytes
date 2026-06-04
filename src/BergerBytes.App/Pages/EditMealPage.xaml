@@ -106,7 +106,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Scan / Search Buttons -->
+                <!-- Scan / Search / Manual Buttons -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,8,0,0">
                     <Button Grid.Column="0"
                             Text="Scan Barcode"
@@ -127,6 +127,15 @@
                             HeightRequest="44"
                             IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
                 </Grid>
+                <Button Text="✏️ Enter Manually"
+                        Command="{Binding ManualAddFoodCommand}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                        TextColor="{StaticResource BrandPrimary}"
+                        BorderColor="{StaticResource BrandPrimary}"
+                        BorderWidth="1"
+                        CornerRadius="8"
+                        HeightRequest="44"
+                        IsEnabled="{Binding IsLoadingProduct, Converter={StaticResource InvertedBoolConverter}}" />
 
                 <!-- Loading Indicator -->
                 <ActivityIndicator IsRunning="{Binding IsLoadingProduct}"
@@ -161,7 +170,7 @@
                                         StrokeThickness="1"
                                         StrokeShape="RoundRectangle 8"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
 
                                         <!-- Food Name -->
                                         <Label Grid.Row="0" Grid.Column="0"
@@ -177,15 +186,28 @@
                                                TextColor="{StaticResource BrandPrimary}"
                                                VerticalOptions="Center" />
 
-                                        <!-- Quantity -->
+                                        <!-- Brand Name -->
                                         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Text="{Binding BrandName}"
+                                               FontSize="12"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                               Margin="0,2,0,0">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding BrandName}" Value="">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+
+                                        <!-- Quantity -->
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                                Text="{Binding QuantityDisplay}"
                                                FontSize="12"
                                                TextColor="{StaticResource BrandSecondary}"
                                                Margin="0,2,0,0" />
 
                                         <!-- Macros -->
-                                        <HorizontalStackLayout Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                                        <HorizontalStackLayout Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
                                                              Spacing="12" 
                                                              Margin="0,4,0,0">
                                             <Label Text="{Binding Protein, StringFormat='P: {0:F1}g'}" 

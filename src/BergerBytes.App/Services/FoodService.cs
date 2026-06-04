@@ -64,8 +64,10 @@ namespace BergerBytes.App.Services
         {
             try
             {
-                var encodedQuery = Uri.EscapeDataString(query);
-                var url = $"{OpenFoodFactsSearchUrl}?search_terms={encodedQuery}&search_simple=1&action=process&json=1&page_size=20&fields={SearchFields}";
+                // Search only the product_name field (not ingredients/categories) and surface
+                // popular products first to improve result relevance.
+                var encodedQuery = Uri.EscapeDataString(query.Trim());
+                var url = $"{OpenFoodFactsSearchUrl}?tagtype_0=product_name&tag_contains_0=contains&tag_0={encodedQuery}&sort_by=unique_scans_n&action=process&json=1&page_size=30&fields={SearchFields}";
 
                 var response = await _httpClient.GetAsync(url, ct);
                 if (!response.IsSuccessStatusCode)
@@ -75,8 +77,16 @@ namespace BergerBytes.App.Services
                 if (searchResponse?.Products == null)
                     return Array.Empty<FoodProductDTO>();
 
+                // Client-side safety filter: at least one query word must appear in the product name
+                var queryWords = query.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
                 return searchResponse.Products
                     .Where(p => !string.IsNullOrWhiteSpace(p.ProductName) || !string.IsNullOrWhiteSpace(p.ProductNameEn))
+                    .Where(p =>
+                    {
+                        var name = $"{p.ProductName ?? string.Empty} {p.ProductNameEn ?? string.Empty}".ToLowerInvariant();
+                        return queryWords.Any(w => name.Contains(w.ToLowerInvariant()));
+                    })
                     .Select(p => MapProductToDTO(p, p.Code ?? string.Empty))
                     .ToList();
             }

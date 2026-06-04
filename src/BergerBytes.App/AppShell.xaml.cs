@@ -19,6 +19,7 @@ namespace BergerBytes.App
             Routing.RegisterRoute("FoodSearchPage", typeof(FoodSearchPage));
             Routing.RegisterRoute("WeightLogPage", typeof(WeightLogPage));
             Routing.RegisterRoute("ExerciseLogPage", typeof(ExerciseLogPage));
+            Routing.RegisterRoute("ManualAddFoodPage", typeof(ManualAddFoodPage));
         }
     }
 }

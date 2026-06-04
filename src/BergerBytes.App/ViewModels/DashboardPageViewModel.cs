@@ -25,7 +25,7 @@ namespace BergerBytes.App.ViewModels
         private bool _hasWeightHistory;
         private IDrawable? _weightChartDrawable;
         private double _weightGoalKg;
-        private int _weightGoalWeeks;
+        private double _weightGoalPaceKgPerWeek;
         private string _weightUnit = "kg";
         private UserSettings? _settings;
         private double _tdee;
@@ -190,7 +190,7 @@ namespace BergerBytes.App.ViewModels
         public bool HasProfileData => _settings?.HasCompleteProfile == true && _lastWeightLog != null;
 
         /// <summary>Maintenance energy expenditure to display on the dashboard.</summary>
-        public string TdeeDisplay => _tdee > 0 ? $"TDEE: ~{_tdee:F0} kcal/day" : string.Empty;
+        public string TdeeDisplay => _tdee > 0 ? $"~{_tdee:F0} kcal/day" : string.Empty;
 
         /// <summary>True when WeightGoalSuggestedIntakeDisplay has a value to show.</summary>
         public bool HasSuggestedIntake => !string.IsNullOrEmpty(WeightGoalSuggestedIntakeDisplay);
@@ -198,7 +198,7 @@ namespace BergerBytes.App.ViewModels
         // ── Weight goal calorie calculation ──────────────────────────────────
 
         public bool HasWeightGoal =>
-            _weightGoalKg > 0 && _weightGoalWeeks > 0 && _lastWeightLog != null;
+            _weightGoalKg > 0 && _weightGoalPaceKgPerWeek > 0 && _lastWeightLog != null;
 
         public string WeightGoalSummary
         {
@@ -206,7 +206,18 @@ namespace BergerBytes.App.ViewModels
             {
                 if (!HasWeightGoal) return string.Empty;
                 double display = _weightUnit == "lbs" ? _weightGoalKg / 0.45359237 : _weightGoalKg;
-                return $"{display:F1} {_weightUnit} in {_weightGoalWeeks} weeks";
+                return $"{display:F1} {_weightUnit}";
+            }
+        }
+
+        public string WeightGoalEtaDisplay
+        {
+            get
+            {
+                if (!HasWeightGoal) return string.Empty;
+                double diffKg = Math.Abs(_lastWeightLog!.WeightKg - _weightGoalKg);
+                int estimatedWeeks = (int)Math.Ceiling(diffKg / _weightGoalPaceKgPerWeek);
+                return estimatedWeeks > 0 ? $"~{estimatedWeeks} weeks to go" : string.Empty;
             }
         }
 
@@ -215,10 +226,10 @@ namespace BergerBytes.App.ViewModels
             get
             {
                 if (!HasWeightGoal) return string.Empty;
-                double diffKg = Math.Abs(_lastWeightLog!.WeightKg - _weightGoalKg);
-                double weeklyKg = diffKg / _weightGoalWeeks;
-                double weeklyDisplay = _weightUnit == "lbs" ? weeklyKg / 0.45359237 : weeklyKg;
-                return $"{weeklyDisplay:F1} {_weightUnit}/week";
+                double paceDisplay = _weightUnit == "lbs"
+                    ? _weightGoalPaceKgPerWeek / 0.45359237
+                    : _weightGoalPaceKgPerWeek;
+                return $"{paceDisplay:F2} {_weightUnit}/week";
             }
         }
 
@@ -230,7 +241,8 @@ namespace BergerBytes.App.ViewModels
                 if (!HasWeightGoal) return string.Empty;
                 double diffKg = _lastWeightLog!.WeightKg - _weightGoalKg; // + = losing
                 if (Math.Abs(diffKg) < 0.05) return "You've reached your goal!";
-                double dailyDelta = diffKg * 7700.0 / (_weightGoalWeeks * 7.0);
+                double sign = diffKg > 0 ? 1.0 : -1.0; // + = deficit
+                double dailyDelta = sign * _weightGoalPaceKgPerWeek * 7700.0 / 7.0;
                 string label = dailyDelta > 0 ? "deficit" : "surplus";
                 return $"~{Math.Abs(dailyDelta):F0} kcal/day {label}";
             }
@@ -244,7 +256,8 @@ namespace BergerBytes.App.ViewModels
                 if (!HasWeightGoal) return string.Empty;
                 double diffKg = _lastWeightLog!.WeightKg - _weightGoalKg;
                 if (Math.Abs(diffKg) < 0.05) return string.Empty;
-                double dailyDelta = diffKg * 7700.0 / (_weightGoalWeeks * 7.0); // + = deficit
+                double sign = diffKg > 0 ? 1.0 : -1.0; // + = deficit
+                double dailyDelta = sign * _weightGoalPaceKgPerWeek * 7700.0 / 7.0;
 
                 if (HasProfileData && _tdee > 0)
                 {
@@ -307,7 +320,7 @@ namespace BergerBytes.App.ViewModels
             CarbsTarget = settings.DailyCarbsGoal;
             FatTarget = settings.DailyFatGoal;
             _weightGoalKg = settings.WeightGoalKg;
-            _weightGoalWeeks = settings.WeightGoalWeeks;
+            _weightGoalPaceKgPerWeek = settings.WeightGoalPaceKgPerWeek;
             _weightUnit = settings.WeightUnit ?? "kg";
             _settings = settings;
 
@@ -360,6 +373,7 @@ namespace BergerBytes.App.ViewModels
 
                 OnPropertyChanged(nameof(HasWeightGoal));
                 OnPropertyChanged(nameof(WeightGoalSummary));
+                OnPropertyChanged(nameof(WeightGoalEtaDisplay));
                 OnPropertyChanged(nameof(WeightGoalPaceDisplay));
                 OnPropertyChanged(nameof(WeightGoalDailyDeltaDisplay));
                 OnPropertyChanged(nameof(WeightGoalSuggestedIntakeDisplay));

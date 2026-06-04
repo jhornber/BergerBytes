@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 643.62 643.62">
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256">
   <defs>
     <style>
       .cls-1 {
-        fill: none;
-      }
-
-      .cls-2 {
-        fill: #c05b09;
-        font-size: 29px;
+        fill: #dbb181;
+        font-size: 5.75px;
         letter-spacing: 0em;
       }
 
-      .cls-2, .cls-3 {
+      .cls-1, .cls-2 {
         font-family: MicrosoftNewTaiLue-Bold, 'Microsoft New Tai Lue';
         font-weight: 700;
+      }
+
+      .cls-3 {
+        fill: none;
       }
 
       .cls-4 {
@@ -26,46 +26,54 @@
       }
 
       .cls-6 {
-        clip-path: url(#clippath-2);
-      }
-
-      .cls-3 {
-        font-size: 25.04px;
-        letter-spacing: 0em;
+        fill: #f5f8f1;
       }
 
       .cls-7 {
-        clip-path: url(#clippath);
+        clip-path: url(#clippath-2);
+      }
+
+      .cls-2 {
+        fill: #c05b09;
+        font-size: 6.65px;
+        letter-spacing: 0em;
       }
 
       .cls-8 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-9 {
         fill: #fbb03b;
       }
     </style>
     <clipPath id="clippath">
-      <path class="cls-1" d="M96.46,304.34c-29.38-83.91,83.73-157.73,232.71-157.73s244.02,97.52,218.54,154.11"/>
+      <path class="cls-3" d="M76.29,127.15c-6.74-19.25,19.21-36.19,53.4-36.19s55.99,22.38,50.15,35.36"/>
     </clipPath>
     <clipPath id="clippath-1">
-      <path class="cls-1" d="M111.21,411.94h421.68c10.45,0,18.94,8.49,18.94,18.94v34.51c0,17.71-14.38,32.1-32.1,32.1H123.89c-17.71,0-32.1-14.38-32.1-32.1v-34.03c0-10.72,8.7-19.42,19.42-19.42Z"/>
+      <path class="cls-3" d="M82.62,145.52h90.95c3.98,0,7.22,3.23,7.22,7.22v.18c0,6.75-5.48,12.23-12.23,12.23h-81.1c-6.75,0-12.23-5.48-12.23-12.23h0c0-4.08,3.32-7.4,7.4-7.4Z"/>
     </clipPath>
     <clipPath id="clippath-2">
-      <rect class="cls-1" x="99.52" y="312.14" width="444.57" height="91.72" rx="18.8" ry="18.8"/>
+      <rect class="cls-3" x="76.99" y="129.32" width="102.01" height="13.29" rx="6.65" ry="6.65"/>
     </clipPath>
   </defs>
+  <rect class="cls-6" x=".26" y=".69" width="256" height="256"/>
   <g>
-    <path class="cls-8" d="M96.46,303.87c-29.38-83.91,83.73-157.73,232.71-157.73s244.02,97.52,218.54,154.11"/>
+    <g>
+      <path class="cls-9" d="M76.29,127.04c-6.74-19.25,19.21-36.19,53.4-36.19s55.99,22.38,50.15,35.36"/>
+      <g class="cls-8">
+        <text class="cls-2" transform="translate(71.84 94.06)"><tspan x="0" y="0">01100110101100010100111110111</tspan><tspan x="0" y="5.74">01101011011101100110101100010</tspan><tspan x="0" y="11.47">10011111011101101011011101100</tspan><tspan x="0" y="17.21">11010110001010011111011101101</tspan><tspan x="0" y="22.95">01101110110011010110001010011</tspan><tspan x="0" y="28.68">11101110110101101110110011010</tspan><tspan x="0" y="34.42">11000101001111101110110101101</tspan></text>
+      </g>
+    </g>
+    <g>
+      <path class="cls-9" d="M82.62,145.52h90.95c3.98,0,7.22,3.23,7.22,7.22v.18c0,6.75-5.48,12.23-12.23,12.23h-81.1c-6.75,0-12.23-5.48-12.23-12.23h0c0-4.08,3.32-7.4,7.4-7.4Z"/>
+      <g class="cls-4">
+        <text class="cls-2" transform="translate(72.91 139.67)"><tspan x="0" y="0">01100110101100010100111110111</tspan><tspan x="0" y="5.74">01101011011101100110101100010</tspan><tspan x="0" y="11.47">10011111011101101011011101100</tspan><tspan x="0" y="17.21">11010110001010011111011101101</tspan><tspan x="0" y="22.95">01101110110011010110001010011</tspan><tspan x="0" y="28.68">11101110110101101110110011010</tspan><tspan x="0" y="34.42">11000101001111101110110101101</tspan></text>
+      </g>
+    </g>
     <g class="cls-7">
-      <text class="cls-2" transform="translate(77.06 160.13)"><tspan x="0" y="0">01100110101100010100111110111</tspan><tspan x="0" y="25">01101011011101100110101100010</tspan><tspan x="0" y="50">10011111011101101011011101100</tspan><tspan x="0" y="75">11010110001010011111011101101</tspan><tspan x="0" y="100">01101110110011010110001010011</tspan><tspan x="0" y="125">11101110110101101110110011010</tspan><tspan x="0" y="150">11000101001111101110110101101</tspan></text>
+      <rect class="cls-5" x="76.99" y="129.32" width="102.01" height="13.29" rx="6.65" ry="6.65"/>
+      <text class="cls-1" transform="translate(75.93 123.16) scale(1.05 1)"><tspan x="0" y="0">011001101011000101001111101110</tspan><tspan x="0" y="5.34">110101101110110011010110001010</tspan><tspan x="0" y="10.67">011111011101101011011101100110</tspan><tspan x="0" y="16.01">101100010100111110111011010110</tspan><tspan x="0" y="21.34">111011001101011000101001111101</tspan><tspan x="0" y="26.68">110110101101110110011010110001</tspan><tspan x="0" y="32.01">010011111011101101011011101100</tspan></text>
     </g>
-  </g>
-  <g>
-    <path class="cls-8" d="M111.21,411.94h421.68c10.45,0,18.94,8.49,18.94,18.94v34.51c0,17.71-14.38,32.1-32.1,32.1H123.89c-17.71,0-32.1-14.38-32.1-32.1v-34.03c0-10.72,8.7-19.42,19.42-19.42Z"/>
-    <g class="cls-4">
-      <text class="cls-2" transform="translate(81.72 386.43)"><tspan x="0" y="0">01100110101100010100111110111</tspan><tspan x="0" y="25">01101011011101100110101100010</tspan><tspan x="0" y="50">10011111011101101011011101100</tspan><tspan x="0" y="75">11010110001010011111011101101</tspan><tspan x="0" y="100">01101110110011010110001010011</tspan><tspan x="0" y="125">11101110110101101110110011010</tspan><tspan x="0" y="150">11000101001111101110110101101</tspan></text>
-    </g>
-  </g>
-  <rect class="cls-5" x="99.52" y="312.14" width="444.57" height="91.72" rx="18.8" ry="18.8"/>
-  <g class="cls-6">
-    <text class="cls-3" transform="translate(95.06 296.28) scale(1.05 1)"><tspan x="0" y="0">011001101011000101001111101110</tspan><tspan x="0" y="23.25">110101101110110011010110001010</tspan><tspan x="0" y="46.5">011111011101101011011101100110</tspan><tspan x="0" y="69.75">101100010100111110111011010110</tspan><tspan x="0" y="93">111011001101011000101001111101</tspan><tspan x="0" y="116.25">110110101101110110011010110001</tspan><tspan x="0" y="139.5">010011111011101101011011101100</tspan></text>
   </g>
 </svg>

@@ -42,6 +42,9 @@ namespace BergerBytes.App.Services
                 try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN AgeYears INTEGER NOT NULL DEFAULT 0"); } catch { }
                 try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN Sex TEXT NOT NULL DEFAULT ''"); } catch { }
                 try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN ActivityLevel TEXT NOT NULL DEFAULT 'Sedentary'"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN WeightGoalPaceKgPerWeek REAL NOT NULL DEFAULT 0"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE UserSettings ADD COLUMN OnboardingCompleted INTEGER NOT NULL DEFAULT 0"); } catch { }
+                try { await _database.ExecuteAsync("ALTER TABLE MealLog ADD COLUMN BrandName TEXT NOT NULL DEFAULT ''"); } catch { }
 
                 lock (_initLock)
                 {
@@ -181,6 +184,25 @@ namespace BergerBytes.App.Services
                 .ToListAsync();
         }
 
+        public async Task<List<RecentFoodItem>> GetRecentFoodsAsync(int maxCount, int offset)
+        {
+            await InitAsync();
+            return await _database!.Table<RecentFoodItem>()
+                .OrderByDescending(r => r.LastUsedAt)
+                .Skip(offset)
+                .Take(maxCount)
+                .ToListAsync();
+        }
+
+        public async Task<List<RecentFoodItem>> SearchRecentFoodsAsync(string query)
+        {
+            await InitAsync();
+            var pattern = $"%{query.Trim().Replace("%", "\\%").Replace("_", "\\_")}%";
+            return await _database!.QueryAsync<RecentFoodItem>(
+                "SELECT * FROM RecentFoodItem WHERE FoodName LIKE ? ORDER BY LastUsedAt DESC",
+                pattern);
+        }
+
         public async Task RecordFoodUsageAsync(string foodName, double calories, double protein, double carbs, double fat, string barcode = "", double quantity = 1.0, string unit = "serving")
         {
             if (string.IsNullOrWhiteSpace(foodName))
@@ -220,13 +242,13 @@ namespace BergerBytes.App.Services
                     LastUsedAt = DateTime.Now
                 });
 
-                // Trim to 20 most recent
+                // Trim to 200 most recent
                 var all = await _database.Table<RecentFoodItem>()
                     .OrderByDescending(r => r.LastUsedAt)
                     .ToListAsync();
-                if (all.Count > 20)
+                if (all.Count > 200)
                 {
-                    foreach (var old in all.Skip(20))
+                    foreach (var old in all.Skip(200))
                         await _database.DeleteAsync(old);
                 }
             }

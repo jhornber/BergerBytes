@@ -3,6 +3,7 @@ namespace BergerBytes.Shared.Models
     public class FoodEntry
     {
         public string Name { get; set; } = string.Empty;
+        public string BrandName { get; set; } = string.Empty;
         public string CaloriesText { get; set; } = string.Empty;
         public string ProteinText { get; set; } = string.Empty;
         public string CarbsText { get; set; } = string.Empty;

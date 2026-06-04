@@ -9,6 +9,8 @@ namespace BergerBytes.Shared.Models
 
         public string FoodName { get; set; } = string.Empty;
 
+        public string BrandName { get; set; } = string.Empty;
+
         public double Calories { get; set; }
 
         public double Protein { get; set; }

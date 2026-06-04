@@ -16,6 +16,7 @@ namespace BergerBytes.App.Pages
             base.OnNavigatedTo(args);
             if (BindingContext is AddMealPageViewModel vm)
             {
+                await vm.ProcessPendingRecentFoodAsync();
                 await vm.ProcessPendingFoodProductAsync();
                 await vm.ProcessPendingBarcodeAsync();
                 vm.ProcessPendingFoodEntry();

@@ -23,8 +23,8 @@ namespace BergerBytes.Shared.Models
         /// <summary>Target body weight in kilograms. 0 = no goal set.</summary>
         public double WeightGoalKg { get; set; } = 0;
 
-        /// <summary>Number of weeks to reach WeightGoalKg. 0 = no goal set.</summary>
-        public int WeightGoalWeeks { get; set; } = 0;
+        /// <summary>Weight loss/gain pace in kg per week. 0 = no goal (maintain). Always stored in kg regardless of unit preference.</summary>
+        public double WeightGoalPaceKgPerWeek { get; set; } = 0;
 
         /// <summary>Height in centimeters. 0 = not set.</summary>
         public double HeightCm { get; set; } = 0;
@@ -35,8 +35,11 @@ namespace BergerBytes.Shared.Models
         /// <summary>"Male" or "Female". Empty string = not set.</summary>
         public string Sex { get; set; } = string.Empty;
 
-        /// <summary>Activity level for TDEE calculation. One of: Sedentary, Lightly Active, Moderately Active, Very Active, Extra Active.</summary>
-        public string ActivityLevel { get; set; } = "Sedentary";
+        /// <summary>Activity level for TDEE calculation. One of: Not Active, Lightly Active, Active, Very Active.</summary>
+        public string ActivityLevel { get; set; } = "Not Active";
+
+        /// <summary>True once the user has completed the first-launch onboarding wizard.</summary>
+        public bool OnboardingCompleted { get; set; } = false;
 
         public DateTime LastModified { get; set; } = DateTime.Now;
 
@@ -61,11 +64,10 @@ namespace BergerBytes.Shared.Models
 
             double multiplier = ActivityLevel switch
             {
-                "Lightly Active"    => 1.375,
-                "Moderately Active" => 1.55,
-                "Very Active"       => 1.725,
-                "Extra Active"      => 1.9,
-                _                   => 1.2   // Sedentary
+                "Lightly Active" => 1.375,
+                "Active"         => 1.55,
+                "Very Active"    => 1.725,
+                _                => 1.2   // Not Active
             };
 
             return bmr * multiplier;
