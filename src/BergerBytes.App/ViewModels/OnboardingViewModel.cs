@@ -372,7 +372,7 @@ namespace BergerBytes.App.ViewModels
 
         private void GoBack()
         {
-            if (_currentStep > 1)
+            if (_currentStep > 0)
                 CurrentStep--;
         }
 

@@ -56,7 +56,7 @@
                         <Label Text="🧬  Body metrics for your personalized calorie target" FontSize="15" />
                         <Label Text="🏃  Your day-to-day activity level" FontSize="15" />
                         <Label Text="🥗  Macro split that matches your training style" FontSize="15" />
-                        <Label Text="🎯  Your weight goal and weekly pace" FontSize="15" />
+                        <Label Text="🎯  Your weight goal and weekly weight targets" FontSize="15" />
                     </VerticalStackLayout>
 
                     <Label Text="Everything can be changed later in Settings."
@@ -76,7 +76,7 @@
                            FontAttributes="Bold"
                            TextColor="{StaticResource BrandPrimary}" />
 
-                    <Label Text="This affects how weight, height, and pace are shown throughout the app. You can switch it any time in Settings."
+                    <Label Text="This affects how weight, height, and weekly weight targets are shown throughout the app. You can switch it any time in Settings."
                            FontSize="15"
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
 
@@ -376,7 +376,7 @@
                            FontAttributes="Bold"
                            TextColor="{StaticResource BrandPrimary}" />
 
-                    <Label Text="Lose fat, build muscle, or just maintain? Set your target and weekly pace. A sustainable pace protects your muscle — and your sanity."
+                    <Label Text="Lose fat, build muscle, or just maintain? Set your target weight and how fast you want to get there. A slow, steady rate protects your muscle — and your sanity."
                            FontSize="15"
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
 
@@ -433,10 +433,10 @@
                                          Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
 
                                 <VerticalStackLayout Spacing="6">
-                                    <Label Text="{Binding WeightUnit, StringFormat='⏱ Pace ({0}/week)'}"
+                                    <Label Text="{Binding WeightUnit, StringFormat='⏱ Weekly weight change ({0}/week)'}"
                                            FontSize="16"
                                            FontAttributes="Bold" />
-                                    <Label Text="0.5–1.0 kg/week (1–2 lbs/week) is the sweet spot — fast enough to see progress, slow enough to keep your muscle."
+                                    <Label Text="How many lbs/kg to lose (or gain) each week. A slow, steady rate protects muscle — 0.5 to 1.0 kg/week (1–2 lbs/week) is the sweet spot."
                                            FontSize="12"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                                     <HorizontalStackLayout Spacing="10">

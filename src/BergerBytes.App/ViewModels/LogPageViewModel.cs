@@ -11,6 +11,7 @@ namespace BergerBytes.App.ViewModels
         private readonly IExerciseLogRepository _exerciseRepository;
         private bool _isRefreshing;
         private DateTime _selectedDate = DateTime.Today;
+        private bool _isViewingToday = true;
 
         public ObservableCollection<MealGroup> MealGroups { get; } = new();
         public ObservableCollection<ExerciseLog> ExerciseLogs { get; } = new();
@@ -35,6 +36,7 @@ namespace BergerBytes.App.ViewModels
                 if (_selectedDate != value)
                 {
                     _selectedDate = value;
+                    _isViewingToday = value.Date == DateTime.Today;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(SelectedDateDisplay));
                     OnPropertyChanged(nameof(IsToday));
@@ -53,18 +55,19 @@ namespace BergerBytes.App.ViewModels
         {
             get
             {
+                if (SelectedDate.Date == DateTime.Today.AddDays(1))
+                    return "Tomorrow";
                 if (SelectedDate.Date == DateTime.Today)
                     return "Today";
-                else if (SelectedDate.Date == DateTime.Today.AddDays(-1))
+                if (SelectedDate.Date == DateTime.Today.AddDays(-1))
                     return "Yesterday";
-                else
-                    return SelectedDate.ToString("MMMM d, yyyy");
+                return SelectedDate.ToString("MMMM d, yyyy");
             }
         }
 
         public bool IsToday => SelectedDate.Date == DateTime.Today;
 
-        public bool CanGoToNextDay => SelectedDate.Date < DateTime.Today;
+        public bool CanGoToNextDay => SelectedDate.Date <= DateTime.Today;
 
         // Daily Summary Properties
         public double DailyTotalCalories => MealGroups.Sum(g => g.TotalCalories);
@@ -110,6 +113,18 @@ namespace BergerBytes.App.ViewModels
 
         public async Task InitializeAsync()
         {
+            // If the user was viewing "today" and the calendar date has advanced (e.g. opened
+            // the app the next morning), snap to the new today before refreshing.
+            if (_isViewingToday && _selectedDate.Date != DateTime.Today)
+            {
+                _selectedDate = DateTime.Today;
+                OnPropertyChanged(nameof(SelectedDate));
+                OnPropertyChanged(nameof(SelectedDateDisplay));
+                OnPropertyChanged(nameof(IsToday));
+                OnPropertyChanged(nameof(CanGoToNextDay));
+                NextDayCommand.ChangeCanExecute();
+                GoToTodayCommand.ChangeCanExecute();
+            }
             await RefreshMealLogsAsync();
         }
 
@@ -196,23 +211,20 @@ namespace BergerBytes.App.ViewModels
 
         private async Task SelectDateAsync()
         {
-            // For now, we'll use a simple action sheet to select recent dates
-            // In the future, this could be replaced with a calendar picker
-            var options = new List<string>();
+            var options = new List<string> { "Tomorrow" };
 
             for (int i = 0; i < 7; i++)
             {
-                var date = DateTime.Today.AddDays(-i);
-                var label = i == 0 ? "Today" : 
-                           i == 1 ? "Yesterday" : 
-                           date.ToString("MMMM d, yyyy");
+                var label = i == 0 ? "Today" :
+                           i == 1 ? "Yesterday" :
+                           DateTime.Today.AddDays(-i).ToString("MMMM d, yyyy");
                 options.Add(label);
             }
 
             var result = await Application.Current!.MainPage!.DisplayActionSheet(
-                "Select Date", 
-                "Cancel", 
-                null, 
+                "Select Date",
+                "Cancel",
+                null,
                 options.ToArray());
 
             if (result != null && result != "Cancel")
@@ -220,7 +232,8 @@ namespace BergerBytes.App.ViewModels
                 var selectedIndex = options.IndexOf(result);
                 if (selectedIndex >= 0)
                 {
-                    SelectedDate = DateTime.Today.AddDays(-selectedIndex);
+                    // index 0 = Tomorrow (+1), 1 = Today (0), 2 = Yesterday (-1), …
+                    SelectedDate = DateTime.Today.AddDays(1 - selectedIndex);
                 }
             }
         }

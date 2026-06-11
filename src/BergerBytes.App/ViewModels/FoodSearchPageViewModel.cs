@@ -12,6 +12,7 @@ namespace BergerBytes.App.ViewModels
         private readonly IRecentFoodRepository _recentFoodRepository;
         private string _searchQuery = string.Empty;
         private bool _isSearching = false;
+        private CancellationTokenSource? _localSearchCts;
         private bool _hasNoResults = false;
         private bool _hasRecentItems = false;
         private bool _isLoadingMoreRecents = false;
@@ -32,6 +33,8 @@ namespace BergerBytes.App.ViewModels
                 OnPropertyChanged();
                 if (string.IsNullOrWhiteSpace(value))
                     ClearSearchState();
+                else
+                    _ = SearchLocalWithDebounceAsync(value);
             }
         }
 
@@ -148,25 +151,49 @@ namespace BergerBytes.App.ViewModels
             }
         }
 
+        private async Task SearchLocalWithDebounceAsync(string query)
+        {
+            _localSearchCts?.Cancel();
+            _localSearchCts = new CancellationTokenSource();
+            var cts = _localSearchCts;
+
+            try
+            {
+                await Task.Delay(300, cts.Token);
+                await SearchLocalAsync(query.Trim(), cts.Token);
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private async Task SearchLocalAsync(string query, CancellationToken cancellationToken = default)
+        {
+            var localResults = await _recentFoodRepository.SearchRecentFoodsAsync(query);
+
+            if (cancellationToken.IsCancellationRequested) return;
+
+            MatchingRecentItems.Clear();
+            foreach (var item in localResults)
+                MatchingRecentItems.Add(item);
+            HasMatchingRecents = MatchingRecentItems.Count > 0;
+        }
+
         private async Task SearchAsync()
         {
             if (string.IsNullOrWhiteSpace(SearchQuery))
                 return;
 
+            // Cancel any pending debounced local search — we'll refresh it synchronously below
+            _localSearchCts?.Cancel();
+
             IsSearching = true;
             HasNoResults = false;
             HasApiResults = false;
             SearchResults.Clear();
-            MatchingRecentItems.Clear();
-            HasMatchingRecents = false;
 
             try
             {
-                // Local search is instant — show results before the API responds
-                var localResults = await _recentFoodRepository.SearchRecentFoodsAsync(SearchQuery.Trim());
-                foreach (var item in localResults)
-                    MatchingRecentItems.Add(item);
-                HasMatchingRecents = MatchingRecentItems.Count > 0;
+                // Refresh local results immediately before making the API call
+                await SearchLocalAsync(SearchQuery.Trim());
 
                 // API search
                 var apiResults = await _foodService.SearchFoodAsync(SearchQuery);
@@ -190,6 +217,7 @@ namespace BergerBytes.App.ViewModels
 
         private void ClearSearchState()
         {
+            _localSearchCts?.Cancel();
             HasNoResults = false;
             HasApiResults = false;
             HasMatchingRecents = false;
