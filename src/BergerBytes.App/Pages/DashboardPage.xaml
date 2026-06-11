@@ -28,6 +28,71 @@
                     FontSize="16"
                     TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
 
+                <!-- Date Navigation -->
+                <Border Stroke="{StaticResource Gray300Brush}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <!-- Previous Day Button -->
+                        <Button Grid.Column="0"
+                                Text="◀"
+                                Command="{Binding PreviousDayCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BrandPrimary}"
+                                FontSize="20"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                Padding="0" />
+
+                        <!-- Date Display -->
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="2"
+                                             VerticalOptions="Center"
+                                             HorizontalOptions="Center">
+                            <Label Text="{Binding SelectedDateDisplay}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Tap to select date"
+                                   FontSize="11"
+                                   TextColor="{StaticResource Gray400}"
+                                   HorizontalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectDateCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+
+                        <!-- Next Day Button -->
+                        <Button Grid.Column="2"
+                                Text="▶"
+                                Command="{Binding NextDayCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BrandPrimary}"
+                                FontSize="20"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                Padding="0"
+                                IsEnabled="{Binding CanGoToNextDay}" />
+
+                        <!-- Today Button -->
+                        <Button Grid.Column="3"
+                                Text="Today"
+                                Command="{Binding GoToTodayCommand}"
+                                BackgroundColor="{StaticResource BrandSecondary}"
+                                TextColor="{StaticResource White}"
+                                FontSize="12"
+                                CornerRadius="8"
+                                WidthRequest="60"
+                                HeightRequest="36"
+                                Padding="0"
+                                Margin="8,0,0,0"
+                                IsVisible="{Binding IsToday, Converter={StaticResource InvertedBoolConverter}}" />
+                    </Grid>
+                </Border>
+
                 <!-- Calories Card -->
                 <Border
                     Stroke="{StaticResource BrandSecondaryBrush}"

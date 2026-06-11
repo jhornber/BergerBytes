@@ -12,6 +12,8 @@ namespace BergerBytes.App.ViewModels
         private readonly IWeightLogRepository _weightLogRepository;
         private readonly IExerciseLogRepository _exerciseLogRepository;
         private bool _isRefreshing;
+        private DateTime _selectedDate = DateTime.Today;
+        private bool _isViewingToday = true;
         private double _caloriesConsumed;
         private double _caloriesBurned;
         private double _proteinConsumed;
@@ -88,6 +90,40 @@ namespace BergerBytes.App.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public DateTime SelectedDate
+        {
+            get => _selectedDate;
+            set
+            {
+                if (_selectedDate != value)
+                {
+                    _selectedDate = value;
+                    _isViewingToday = value.Date == DateTime.Today;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(SelectedDateDisplay));
+                    OnPropertyChanged(nameof(IsToday));
+                    OnPropertyChanged(nameof(CanGoToNextDay));
+                    NextDayCommand.ChangeCanExecute();
+                    GoToTodayCommand.ChangeCanExecute();
+                    _ = RefreshStatsAsync();
+                }
+            }
+        }
+
+        public string SelectedDateDisplay
+        {
+            get
+            {
+                if (_selectedDate.Date == DateTime.Today) return "Today";
+                if (_selectedDate.Date == DateTime.Today.AddDays(-1)) return "Yesterday";
+                if (_selectedDate.Date == DateTime.Today.AddDays(1)) return "Tomorrow";
+                return _selectedDate.ToString("MMMM d, yyyy");
+            }
+        }
+
+        public bool IsToday => _selectedDate.Date == DateTime.Today;
+        public bool CanGoToNextDay => _selectedDate.Date <= DateTime.Today;
 
         public double CaloriesConsumed
         {
@@ -301,6 +337,10 @@ namespace BergerBytes.App.ViewModels
         }
 
         public ICommand RefreshCommand { get; }
+        public ICommand PreviousDayCommand { get; }
+        public Command NextDayCommand { get; }
+        public Command GoToTodayCommand { get; }
+        public ICommand SelectDateCommand { get; }
 
         public DashboardPageViewModel(IMealLogRepository repository, ISettingsRepository settingsRepository, IWeightLogRepository weightLogRepository, IExerciseLogRepository exerciseLogRepository)
         {
@@ -309,10 +349,26 @@ namespace BergerBytes.App.ViewModels
             _weightLogRepository = weightLogRepository;
             _exerciseLogRepository = exerciseLogRepository;
             RefreshCommand = new Command(async () => await RefreshStatsAsync());
+            PreviousDayCommand = new Command(() => SelectedDate = SelectedDate.AddDays(-1));
+            NextDayCommand = new Command(() => SelectedDate = SelectedDate.AddDays(1), () => CanGoToNextDay);
+            GoToTodayCommand = new Command(() => SelectedDate = DateTime.Today, () => !IsToday);
+            SelectDateCommand = new Command(async () => await SelectDateAsync());
         }
 
         public async Task InitializeAsync()
         {
+            // Snap to today if the calendar has advanced since last view
+            if (_isViewingToday && _selectedDate.Date != DateTime.Today)
+            {
+                _selectedDate = DateTime.Today;
+                OnPropertyChanged(nameof(SelectedDate));
+                OnPropertyChanged(nameof(SelectedDateDisplay));
+                OnPropertyChanged(nameof(IsToday));
+                OnPropertyChanged(nameof(CanGoToNextDay));
+                NextDayCommand.ChangeCanExecute();
+                GoToTodayCommand.ChangeCanExecute();
+            }
+
             // Load user settings first
             var settings = await _settingsRepository.GetSettingsAsync();
             CalorieTarget = settings.DailyCalorieGoal;
@@ -333,21 +389,24 @@ namespace BergerBytes.App.ViewModels
 
             try
             {
-                // Get all meals from today
+                // Get all meals for selected date
                 var allMeals = await _repository.GetAllAsync();
-                var today = DateTime.Today;
-                var todaysMeals = allMeals.Where(m => m.Timestamp.Date == today).ToList();
+                var selectedDay = _selectedDate.Date;
+                var selectedDayEnd = selectedDay.AddDays(1);
+                var dayMeals = allMeals
+                    .Where(m => m.Timestamp >= selectedDay && m.Timestamp < selectedDayEnd)
+                    .ToList();
 
                 // Calculate totals
-                CaloriesConsumed = todaysMeals.Sum(m => m.Calories);
-                ProteinConsumed = todaysMeals.Sum(m => m.Protein);
-                CarbsConsumed = todaysMeals.Sum(m => m.Carbs);
-                FatConsumed = todaysMeals.Sum(m => m.Fat);
+                CaloriesConsumed = dayMeals.Sum(m => m.Calories);
+                ProteinConsumed = dayMeals.Sum(m => m.Protein);
+                CarbsConsumed = dayMeals.Sum(m => m.Carbs);
+                FatConsumed = dayMeals.Sum(m => m.Fat);
 
-                // Load today's exercise calories burned
+                // Load exercise calories burned for selected date
                 var allExercises = await _exerciseLogRepository.GetExerciseLogsAsync();
                 CaloriesBurned = allExercises
-                    .Where(e => e.LoggedAt.Date == today)
+                    .Where(e => e.LoggedAt >= selectedDay && e.LoggedAt < selectedDayEnd)
                     .Sum(e => e.CaloriesBurned);
 
                 // Load weight data
@@ -382,6 +441,32 @@ namespace BergerBytes.App.ViewModels
             finally
             {
                 IsRefreshing = false;
+            }
+        }
+
+        private async Task SelectDateAsync()
+        {
+            var options = new List<string> { "Tomorrow" };
+
+            for (int i = 0; i < 7; i++)
+            {
+                var label = i == 0 ? "Today" :
+                           i == 1 ? "Yesterday" :
+                           DateTime.Today.AddDays(-i).ToString("MMMM d, yyyy");
+                options.Add(label);
+            }
+
+            var result = await Application.Current!.Windows[0].Page!.DisplayActionSheetAsync(
+                "Select Date",
+                "Cancel",
+                null,
+                options.ToArray());
+
+            if (result != null && result != "Cancel")
+            {
+                var selectedIndex = options.IndexOf(result);
+                if (selectedIndex >= 0)
+                    SelectedDate = DateTime.Today.AddDays(1 - selectedIndex);
             }
         }
     }
